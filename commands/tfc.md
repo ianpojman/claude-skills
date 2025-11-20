@@ -1,9 +1,9 @@
 ---
-description: Compact ACTIVE.md (archive old session notes)
+description: Capture session notes (usage: /tfc "summary text")
 ---
 
-Run the taskflow compact script:
+Capture session summary to ACTIVE.md:
 
 ```bash
-~/.claude/skills/scripts/taskflow-compact-active.sh
+~/.claude/skills/scripts/taskflow-capture.sh {{args}}
 ```
