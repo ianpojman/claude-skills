@@ -1,0 +1,94 @@
+#!/bin/bash
+# TaskFlow Init - Prime context with ACTIVE.md and BACKLOG.md for AI sessions
+
+set -e
+
+echo "╔══════════════════════════════════════════════════════════════════════╗"
+echo "║                      TASKFLOW INIT                                   ║"
+echo "╚══════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Check if files exist
+if [ ! -f "ACTIVE.md" ] || [ ! -f "BACKLOG.md" ]; then
+    echo "❌ Error: ACTIVE.md or BACKLOG.md not found"
+    echo ""
+    echo "TaskFlow requires:"
+    echo "  • ACTIVE.md - Current sprint tasks"
+    echo "  • BACKLOG.md - Future work"
+    echo ""
+    echo "Run this from project root directory."
+    exit 1
+fi
+
+# Show quick status
+echo "📊 Current State:"
+./scripts/taskflow-status.sh
+echo ""
+
+# Generate context prompt for AI
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📋 SESSION RESUMPTION PROMPT"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Copy and paste this to Claude to resume work:"
+echo ""
+echo "---"
+echo ""
+cat <<'PRIMER'
+Resuming work on this project. Please load TaskFlow context:
+
+1. Read ACTIVE.md - shows current sprint tasks and recent session notes
+
+Note: BACKLOG.md has detailed plans (28k tokens). Only read specific sections when needed using links from ACTIVE.md.
+
+Key TaskFlow commands:
+- taskflow status - Quick one-line status
+- taskflow handoff "summary" - End session with summary
+
+Please start by reading ACTIVE.md to see what we're currently working on.
+PRIMER
+echo ""
+echo "---"
+echo ""
+echo "💡 Or just ask Claude: 'show active' to auto-load ACTIVE.md"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Show recent session notes if they exist
+if grep -q "^### 📅 Session Notes" ACTIVE.md 2>/dev/null; then
+    echo "📅 Recent Session Notes:"
+    echo ""
+    # Show last session note (last occurrence before end of file)
+    awk '/^### 📅 Session Notes/{p=1} p{print} /^---$/ && p{exit}' ACTIVE.md | tail -20
+    echo ""
+fi
+
+# Show active tasks summary
+echo "🚀 Active Tasks Summary:"
+echo ""
+grep "^### " ACTIVE.md | grep -v "📅 Session Notes" | head -10 | while IFS= read -r line; do
+    echo "  • ${line#### }"
+done
+echo ""
+
+# Git context
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "🔧 Git Context:"
+    echo "  Branch: $(git branch --show-current)"
+    echo "  Commit: $(git rev-parse --short HEAD)"
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+        echo "  Status: ⚠️ Uncommitted changes"
+    else
+        echo "  Status: ✅ Clean"
+    fi
+    echo ""
+fi
+
+echo "✅ TaskFlow context ready!"
+echo ""
+echo "Next steps:"
+echo "  1. Copy the context primer above to Claude"
+echo "  2. Or just say: 'show active'"
+echo "  3. Start working on tasks"
+echo "  4. At end: ./scripts/taskflow-handoff.sh"

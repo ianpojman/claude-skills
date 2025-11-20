@@ -1,0 +1,6 @@
+#!/bin/bash
+# TaskFlow Flow Integration
+# Wrapper to call claudeflow as a taskflow subcommand
+
+# Just delegate to claudeflow
+exec ~/.claude/scripts/claudeflow "$@"

@@ -1,0 +1,147 @@
+#!/bin/bash
+# TaskFlow Resume - Resume work on a specific task by ID
+
+set -e
+
+# Check if task ID provided
+if [ -z "$1" ]; then
+    echo "Usage: ./scripts/taskflow-resume.sh <TASK-ID>"
+    echo ""
+    echo "Examples:"
+    echo "  ./scripts/taskflow-resume.sh VAL-001"
+    echo "  ./scripts/taskflow-resume.sh SPARSE-001"
+    echo "  ./scripts/taskflow-resume.sh CAT-001"
+    exit 1
+fi
+
+TASK_ID="$1"
+
+echo "╔══════════════════════════════════════════════════════════════════════╗"
+echo "║                      RESUME TASK: $TASK_ID                           ║"
+echo "╚══════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Function to extract task section from markdown file
+extract_task_section() {
+    local file="$1"
+    local task_id="$2"
+
+    if [ ! -f "$file" ]; then
+        return 1
+    fi
+
+    # Find the task section and extract it
+    awk -v task="$task_id" '
+        BEGIN { in_section=0; found=0 }
+        /^###/ {
+            if (in_section) {
+                exit
+            }
+            if ($0 ~ task) {
+                in_section=1
+                found=1
+            }
+        }
+        in_section { print }
+        END { exit !found }
+    ' "$file"
+}
+
+# Search in ACTIVE.md first
+echo "📍 Searching ACTIVE.md..."
+if extract_task_section "ACTIVE.md" "$TASK_ID" > /tmp/taskflow-resume-active.txt 2>/dev/null; then
+    echo "✅ Found in ACTIVE.md"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    cat /tmp/taskflow-resume-active.txt
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    FOUND_IN_ACTIVE=1
+else
+    echo "⚠️  Not found in ACTIVE.md"
+    FOUND_IN_ACTIVE=0
+fi
+
+# Search in BACKLOG.md
+echo "📍 Searching BACKLOG.md..."
+if extract_task_section "BACKLOG.md" "$TASK_ID" > /tmp/taskflow-resume-backlog.txt 2>/dev/null; then
+    echo "✅ Found in BACKLOG.md"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    cat /tmp/taskflow-resume-backlog.txt
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    FOUND_IN_BACKLOG=1
+else
+    echo "⚠️  Not found in BACKLOG.md"
+    FOUND_IN_BACKLOG=0
+fi
+
+# Check if task not found anywhere
+if [ "$FOUND_IN_ACTIVE" -eq 0 ] && [ "$FOUND_IN_BACKLOG" -eq 0 ]; then
+    echo ""
+    echo "❌ Task $TASK_ID not found in ACTIVE.md or BACKLOG.md"
+    echo ""
+    echo "💡 Tips:"
+    echo "  • Check task ID spelling (case-sensitive)"
+    echo "  • Use 'taskflow list' to see all active tasks"
+    echo "  • Use 'taskflow search <keyword>' to search by description"
+    exit 1
+fi
+
+# Look for detailed documentation in docs/active/
+echo "📍 Checking for detailed documentation..."
+DETAIL_FILES=$(find docs/active -type f -name "*${TASK_ID}*" 2>/dev/null || true)
+
+if [ -n "$DETAIL_FILES" ]; then
+    echo "✅ Found detailed documentation:"
+    echo ""
+    for file in $DETAIL_FILES; do
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📄 $file"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        head -50 "$file"
+        echo ""
+        echo "... (showing first 50 lines, see $file for complete details)"
+        echo ""
+    done
+else
+    echo "ℹ️  No detailed documentation found in docs/active/"
+    echo ""
+fi
+
+# Look for related session notes
+echo "📍 Checking for related session notes..."
+SESSION_NOTES=$(grep -l "$TASK_ID" docs/SESSION-*.md 2>/dev/null || true)
+
+if [ -n "$SESSION_NOTES" ]; then
+    echo "✅ Found in session notes:"
+    echo ""
+    for note in $SESSION_NOTES; do
+        echo "  • $(basename "$note")"
+    done
+    echo ""
+else
+    echo "ℹ️  No session notes mention this task"
+    echo ""
+fi
+
+# Show git context
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔧 Current Git Context"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Branch: $(git branch --show-current 2>/dev/null || echo 'unknown')"
+echo "  Commit: $(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+echo "  Status: $(git status --short 2>/dev/null | wc -l | xargs) modified files"
+echo ""
+
+# Cleanup temp files
+rm -f /tmp/taskflow-resume-active.txt /tmp/taskflow-resume-backlog.txt
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "💡 Next Steps:"
+echo "  • Review the context above"
+echo "  • Check validation commands or quick status checks"
+echo "  • Update ACTIVE.md when making progress"
+echo "  • Use 'taskflow capture' to record session notes"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

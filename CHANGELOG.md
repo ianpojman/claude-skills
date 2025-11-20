@@ -2,6 +2,26 @@
 
 All notable changes to Claude Skills will be documented in this file.
 
+## [1.2.0] - 2025-11-20
+
+### Added - Repository Consolidation & Compact Feature
+
+**Repository Structure:**
+- 📦 **Scripts in Repo**: Moved all taskflow scripts into `skills/scripts/` for version control
+- 🗂️ **Disabled Skills Archived**: Moved `*.disabled` directories to `../skills.disabled/`
+- 🔧 **Compact Feature**: New ultra-light `taskflow compact active` command
+
+**New Compact Feature:**
+- Archives session notes older than 3 days to `docs/session-notes/YYYY-MM-DD.md`
+- Keeps ACTIVE.md lean (~500-1000 token savings)
+- Zero LLM tokens (pure file operations)
+- Script: `skills/scripts/taskflow-compact-active.sh`
+
+**Token Efficiency:**
+- Minimal skill: 1KB (was 16KB in disabled version)
+- Compact via file ops: 0 tokens (vs ~10-20K for LLM compaction)
+- New session start: ~2K tokens (ACTIVE.md + BACKLOG.md indexes)
+
 ## [1.1.0] - 2025-11-20
 
 ### Added - TaskFlow Major Update

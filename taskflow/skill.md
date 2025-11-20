@@ -8,9 +8,18 @@
 ```bash
 taskflow status
 # or
-~/.claude/scripts/taskflow-status-minimal.sh
+~/.claude/skills/scripts/taskflow-status-minimal.sh
 ```
 Shows: task counts, branch, token usage
+
+### Compact ACTIVE.md (archive old session notes)
+```bash
+taskflow compact active
+# or
+~/.claude/skills/scripts/taskflow-compact-active.sh
+```
+Archives session notes older than 3 days to `docs/session-notes/YYYY-MM-DD.md`
+Keeps ACTIVE.md lean (~500-1000 token savings)
 
 ### Resume Task (loads task details on-demand)
 ```bash
