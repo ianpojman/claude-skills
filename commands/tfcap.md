@@ -1,0 +1,1 @@
+Use the taskflow agent to capture session notes to ACTIVE.md. Include summary of work done, discoveries, and next steps from the current conversation. Run in isolated context.

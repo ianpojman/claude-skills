@@ -1,0 +1,1 @@
+Use the taskflow agent to generate a session handoff document. Include current state, running processes, what was done, and what needs doing next. Run in isolated context.

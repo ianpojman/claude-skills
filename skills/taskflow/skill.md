@@ -2,6 +2,8 @@
 
 **Lightweight task management with smart resume.**
 
+⚠️ **IMPORTANT**: Use slash commands (`/tfs`, `/tfl`, `/tfr`) instead of invoking this skill directly to avoid loading this file into context (~900 tokens). Type `/tfhelp` for the complete command reference.
+
 ## Using the TaskFlow Agent (Recommended)
 
 For complex operations (analyze, capture, handoff, validate), use the **TaskFlow agent** to avoid polluting main context:
@@ -72,9 +74,28 @@ cat docs/backlog/emr-infrastructure.md  # Load on-demand
 
 ## Token Budget
 
-- taskflow skill: 0.5K
+- taskflow skill: 0.5K (avoid loading - use slash commands)
 - Status command: 0.05K
 - Resume command: 4K (index + details)
 - Manual file reads: 1-3K each
 
 **Total per session: 5-6K** (was 53K)
+
+---
+
+## Quick Tips
+
+**Zero-Token Commands** (use these!):
+- `/tfs` - Instant status check
+- `/tfl` - List all tasks
+- `/tfr TASK-ID` - Resume task
+- `/tfc` - Compact old notes
+- `/tfhelp` - Full command list
+
+**When to Use Agent** (complex ops):
+- `/tfa` - Analyze token usage
+- `/tfcap` - Capture session notes
+- `/tfh` - Generate handoffs
+- `/tfv` - Validate links
+
+**Pro Tip**: Type `/tfhelp` anytime to see all available commands without loading this skill file.
