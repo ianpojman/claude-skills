@@ -19,8 +19,10 @@ Use macOS `say` command to announce key findings, results, and important informa
 
 **ALWAYS use this pattern**:
 ```bash
-test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Glass.aiff && say -v "Ava (Premium)" "Your message"
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Blow.aiff && say -v "Ava (Premium)" "Your message"
 ```
+
+**Choose sound based on message type** (see Sound Effects section below)
 
 ## Quick Controls
 
@@ -58,10 +60,14 @@ osascript -e "set volume output volume 80"  # Loud (80%)
 
 Modern `.aiff` files (use with `afplay`):
 - **Glass** - Success, completions, celebrations
-- **Tink** - Minimal, cyber mode, status updates
-- **Ping** - Info, notifications, deployments
+- **Blow** - Default, minimal, status updates
+- **Funk** - Updates, progress, milestones
+- **Morse** - Info, technical notifications
+- **Ping** - Deployments, starting processes
 - **Pop** - Errors, warnings
-- **Purr** - Soft, playful, discoveries
+- **Purr** - Discoveries, insights
+- **Frog** - Quirky discoveries, unexpected findings
+- **Submarine** - Rare/special events (use sparingly)
 
 ## Voice Selection
 
@@ -79,9 +85,9 @@ test ! -f ~/.tts_paused && say -v "Allison (Enhanced)" "Switching to Allison enh
 
 - **premium** (default) - Professional, high-quality
 - **dramatic** - Glass/Pop sounds for builds/tests
-- **fun** - Playful with Purr/Ping sounds
-- **cyber** - Futuristic with Tink sounds
-- **celebration** - Glass sounds for major wins
+- **fun** - Playful with Purr/Frog sounds
+- **cyber** - Futuristic with Blow/Morse sounds
+- **celebration** - Glass/Funk sounds for major wins
 
 **Mode switching**:
 ```bash
@@ -102,7 +108,7 @@ test ! -f ~/.tts_paused && say -v "Ava (Premium)" "Switching to cyber mode"
 
 **At skill activation**:
 ```bash
-test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Tink.aiff && say -v "Allison (Enhanced)" "T T S mode activated. Premium voice enabled."
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Blow.aiff && say -v "Ava (Premium)" "T T S mode activated. Premium voice enabled."
 ```
 
 ## Integration in Scripts
@@ -149,6 +155,26 @@ test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Glass.aiff && say -v "A
 test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Pop.aiff && say -v "Ava (Premium)" "Build failed. Three compilation errors found."
 ```
 
+**Status update**:
+```bash
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Blow.aiff && say -v "Ava (Premium)" "Cluster bootstrapping complete."
+```
+
+**Progress milestone**:
+```bash
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Funk.aiff && say -v "Ava (Premium)" "Phase 2 complete. Moving to final validation."
+```
+
+**Technical info**:
+```bash
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Morse.aiff && say -v "Ava (Premium)" "Container logs uploaded to S 3."
+```
+
+**Unexpected discovery**:
+```bash
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Frog.aiff && say -v "Ava (Premium)" "Found undocumented A P I endpoint."
+```
+
 ---
 
-**Remember**: Pause check + concise message. Quality over quantity.
+**Remember**: Pause check + concise message. Match sound to message type. Quality over quantity.
