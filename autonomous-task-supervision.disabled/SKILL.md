@@ -13,6 +13,8 @@ description: Work autonomously on multi-stage tasks with session resilience via 
 
 **Pattern**: Create state → Update each stage → Type "resume" after compaction → Continue
 
+**Tool**: `continuous-local.sh` - Automated continuous execution wrapper (see QUICKSTART.md)
+
 **Commands**: `task-status`, `task-resume`, `task-complete` (installed in ~/bin/)
 
 ## Core Principles
@@ -135,4 +137,41 @@ Use this skill when:
 
 ---
 
-**See Also**: `~/.claude/skills/autonomous-task-supervision-quickstart.md` for detailed examples
+## Continuous Local Execution Tool
+
+**NEW**: Automated wrapper for continuous execution pattern (inspired by continuous-claude).
+
+**Tool**: `~/.claude/scripts/continuous-local.sh`
+
+**Quick Start**:
+```bash
+# Create task
+continuous-local.sh create my_task "Task description"
+
+# Run autonomously
+continuous-local.sh start my_task 10
+
+# Monitor
+continuous-local.sh status my_task
+continuous-local.sh context my_task
+```
+
+**Features**:
+- ✅ Automated iteration loop (no manual "continue" needed)
+- ✅ Filesystem state persistence (survives crashes)
+- ✅ Context continuity between iterations
+- ✅ TaskFlow integration
+- ✅ Validation commands
+- ✅ Parallel task execution
+
+**Documentation**:
+- Quick start: `QUICKSTART.md`
+- Full guide: `CONTINUOUS-LOCAL.md`
+
+**Use when**: You want fully automated continuous execution similar to continuous-claude but using local filesystem instead of git PRs.
+
+---
+
+**See Also**:
+- `QUICKSTART.md` - Getting started with continuous-local tool
+- `CONTINUOUS-LOCAL.md` - Complete documentation for continuous execution pattern

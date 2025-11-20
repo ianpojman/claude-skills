@@ -1,6 +1,6 @@
 ---
 name: taskflow
-description: Token-efficient task and documentation management. Manages TODO.md, BACKLOG.md archival, validates links, syncs status, and keeps token usage under budget across the three-tier system. Shows startup reminders with last-run tracking and recommendations.
+description: Token-efficient task and documentation management. Manages ACTIVE.md, BACKLOG.md, session resumption, task capture, and handoff generation. Keeps token usage under budget across the three-tier system.
 ---
 
 # TaskFlow - Token-Efficient Task Management
@@ -37,59 +37,145 @@ Available commands: analyze, compact, sync, capture, new, validate
 
 ## Quick Commands
 
+**IMPORTANT**: When user types just `taskflow` with no arguments, run `~/.claude/scripts/taskflow.sh` which shows:
+- First 5 active tasks with status emojis
+- Task count and token status
+- Git context
+- Help hint
+
+This is the main entry point and should be the default when user says "taskflow" or asks about TaskFlow status.
+
 ```bash
+taskflow            # Show active tasks (DEFAULT - compact view)
+                    # Script: ~/.claude/scripts/taskflow.sh
+                    # First 5 tasks + status + git context
+
+taskflow init       # Session resumption - prime AI context
+                    # Script: ~/.claude/scripts/taskflow-init.sh
+                    # Generates context primer for new AI sessions
+
+taskflow status     # Quick one-line status check
+                    # Script: ~/.claude/scripts/taskflow-status.sh
+                    # Shows: tasks, branch, tokens
+
+taskflow capture SUMMARY    # Capture session notes
+                            # Script: ~/.claude/scripts/taskflow-capture.sh "summary text"
+                            # Non-interactive: pass summary as argument
+
+taskflow handoff [SUMMARY]  # End session handoff
+                            # Script: ~/.claude/scripts/taskflow-handoff.sh "summary"
+                            # Optional: pass summary or use --no-capture to skip
+
 taskflow analyze    # Token usage + archival candidates
-                    # Script: ./scripts/taskflow-analyze.sh
+                    # Script: ~/.claude/scripts/taskflow-analyze.sh
 
-taskflow compact    # Archive completed → save tokens
-                    # Manual process (guided by skill)
+taskflow validate   # Check link integrity
+                    # Script: ~/.claude/scripts/taskflow-validate.sh
 
-taskflow sync       # Sync TODO ↔ BACKLOG status
-                    # Manual check (guided by skill)
+taskflow search QUERY    # Search issues by keyword
+                         # Script: ~/.claude/scripts/taskflow-search.sh "keyword"
+                         # Searches ACTIVE.md, BACKLOG.md, session notes
 
-taskflow capture    # Create/update items from conversation context
-                    # AI-powered (analyzes conversation)
+taskflow list            # List all active tasks with status
+                         # Script: ~/.claude/scripts/taskflow-list.sh
+                         # Shows issue IDs, status emojis, descriptions
 
-taskflow new        # Create task (TODO + BACKLOG)
-                    # Manual process (guided by skill)
-
-taskflow validate   # Check all cross-references
-                    # Script: ./scripts/taskflow-validate.sh
+taskflow resume TASK-ID  # Resume work on specific task
+                         # Script: ~/.claude/scripts/taskflow-resume.sh "TASK-ID"
+                         # Shows full context, related docs, session notes
 ```
 
-**Scripts available:**
-- ✅ `./scripts/taskflow-analyze.sh` - Works now!
-- ✅ `./scripts/taskflow-validate.sh` - Works now!
-- Others are AI-guided manual processes
+**All scripts available at:**
+- `~/.claude/scripts/taskflow-init.sh` - Session resumption
+- `~/.claude/scripts/taskflow-status.sh` - Quick status
+- `~/.claude/scripts/taskflow-capture.sh` - Interactive updates
+- `~/.claude/scripts/taskflow-handoff.sh` - Handoff generator
+- `~/.claude/scripts/taskflow-analyze.sh` - Token analysis
+- `~/.claude/scripts/taskflow-validate.sh` - Link validation
+- `~/.claude/scripts/taskflow-search.sh` - Search issues by keyword
+- `~/.claude/scripts/taskflow-list.sh` - List all active tasks
+- `~/.claude/scripts/taskflow-resume.sh` - Resume specific task
 
 ## System Structure
 
 ```
-TODO.md (2K limit)        → Links to BACKLOG items
-BACKLOG.md (10K limit)    → Active/planned work
-docs/active/ (5K each)    → Current sprint details
-docs/completed/YYYY-MM/   → Archived (not loaded)
-docs/strategy/archived/   → Old backlog items
+ACTIVE.md (2K limit)           → Current sprint tasks + session notes
+BACKLOG.md (10K limit)         → Future work + detailed plans
+LINKING-STANDARD.md            → Documentation linking conventions
+docs/active/ (5K each)         → Current sprint details
+docs/completed/YYYY-MM/        → Archived (not loaded)
+docs/strategy/archived/        → Old backlog items
 ```
 
 ## Operations
 
+### `taskflow init`
+**Session Resumption** - Start new AI session
+- Runs `./scripts/taskflow-init.sh`
+- Shows current status
+- Generates context primer prompt
+- Lists active tasks and git context
+
+**Use at:** Start of new session
+
+### `taskflow status`
+**Quick Check** - One-line status
+- Runs `./scripts/taskflow-status.sh`
+- Format: `📊 N active | branch@commit | ACTIVE Ntok | BACKLOG Ntok`
+
+**Use anytime** for quick check
+
+### `taskflow capture "summary"`
+**Capture Session Notes** - Write to ACTIVE.md
+- Runs `./scripts/taskflow-capture.sh "summary text"`
+- Non-interactive mode for Claude Code
+- Adds timestamped session note
+
+**Example:**
+```bash
+./scripts/taskflow-capture.sh "Fixed ETL-001, investigated CAT-004. Next: test hour 23"
+```
+
+**Use during/end session** to record progress
+
+### `taskflow handoff ["summary"]`
+**Session End** - Generate handoff (optionally capture first)
+- Runs `./scripts/taskflow-handoff.sh`
+- With argument: captures summary first, then generates handoff
+- Without argument: just generates handoff (shows tip)
+- Use `--no-capture` to skip capture entirely
+
+**Examples:**
+```bash
+# Capture + handoff
+./scripts/taskflow-handoff.sh "Fixed ETL-001, started CAT-004"
+
+# Just handoff (no capture)
+./scripts/taskflow-handoff.sh --no-capture
+```
+
+**Shows:** Active issues, git context, running processes, shareable context
+
+**Use at end of session**
+
 ### `taskflow analyze`
-- Count tokens in all docs
-- Find files exceeding budgets
-- List archival candidates (✅ completed items)
-- Show broken links and orphans
+**Token Analysis**
+- Runs `./scripts/taskflow-analyze.sh`
+- Shows token usage for ACTIVE.md and BACKLOG.md
+- Lists archival candidates (completed items)
 
 **Output:**
 ```
-TODO.md: 1.8K ✅ | BACKLOG.md: 31K ❌ (21K over)
+ACTIVE.md: 1.8K ✅ | BACKLOG.md: 31K ❌ (21K over)
 Archive candidates: VER-001 Phase 1 (8K), CAT-003 (4K)
 ```
 
-### `taskflow compact`
-- Move completed items → archives
-- Update cross-references
-- Regenerate INDEX.md files
+### `taskflow validate`
+**Link Integrity**
+- Runs `./scripts/taskflow-validate.sh`
+- Checks archive structure
+- Validates cross-references
+- Finds broken links
 - Validate link integrity
 
 **Result:** BACKLOG.md: 31K → 9K (22K saved)
@@ -126,7 +212,54 @@ CAT-003: TODO says "Ready", BACKLOG says "✅ Complete"
 - Want to preserve session insights
 - Before ending a productive session
 
-### `taskflow handoff` (NEW)
+### `taskflow resume TASK-ID`
+**Resume Work on Specific Task**
+- Runs `./scripts/taskflow-resume.sh TASK-ID`
+- Extracts full task context from ACTIVE.md and BACKLOG.md
+- Shows detailed documentation from docs/active/ if available
+- Lists related session notes
+- Displays current git context
+
+**Example:**
+```bash
+./scripts/taskflow-resume.sh VAL-001
+```
+
+**Output:**
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                      RESUME TASK: VAL-001                            ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+✅ Found in ACTIVE.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+### VAL-001: Task Description
+**Status**: ⏳ In progress
+**Details**: Full task context...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Found detailed documentation:
+📄 docs/active/VAL-001-details.md
+...
+
+🔧 Current Git Context
+  Branch: feature/...
+  Commit: abc1234
+```
+
+**Use when:**
+- Picking up work on a specific task
+- Need full context for a task ID
+- Starting work after a break
+- Another developer mentioned a task ID
+
+**Benefits:**
+- ✅ Instant access to full task context
+- ✅ Shows all related documentation
+- ✅ Links to session notes
+- ✅ Current git state for reference
+
+### `taskflow handoff`
 
 **Creates session handoff for work-in-progress that a NEW Claude session can pick up**
 
@@ -296,9 +429,30 @@ wc -c file.md | awk '{print int($1/4) "K"}'
 ## Integration
 
 **Works with:**
+- **ClaudeFlow**: Autonomous task execution (`claudeflow` or `taskflow flow`)
 - Existing docs/strategy/README.md process
 - Three-tier system (TODO → active → completed)
 - Git workflow (no temp files)
+
+**ClaudeFlow Integration**:
+TaskFlow tracks high-level tasks and documentation, ClaudeFlow executes multi-stage tasks autonomously.
+
+```bash
+# Create TaskFlow issue
+taskflow new REF-001 "Refactor auth module"
+
+# Create ClaudeFlow task for autonomous execution
+claudeflow create refactor_auth "REF-001: Refactor auth"
+# Links to TaskFlow issue during setup
+
+# Run autonomously
+claudeflow start refactor_auth 20
+# Claude automatically updates ACTIVE.md and captures progress
+
+# Alternative: Use via TaskFlow command
+taskflow flow create my_task "Task description"
+taskflow flow start my_task 15
+```
 
 **Respects:**
 - No attribution in commits
