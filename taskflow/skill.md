@@ -1,29 +1,50 @@
-# TaskFlow Minimal - Token-Efficient Task Management
+# TaskFlow - Token-Efficient Task Management
 
-**Ultra-lightweight task management. No fancy formatting.**
+**Lightweight task management with smart resume.**
 
-## Commands
+## Core Commands
 
+### Quick Status (~50 tokens)
 ```bash
-# Status (3 lines, ~50 tokens)
+taskflow status
+# or
 ~/.claude/scripts/taskflow-status-minimal.sh
+```
+Shows: task counts, branch, token usage
 
-# View active tasks (read ACTIVE.md directly)
-cat ACTIVE.md
+### Resume Task (loads task details on-demand)
+```bash
+taskflow resume TASK-ID
+# Example: taskflow resume UI-007
+```
+Loads:
+- ACTIVE.md task index (~1K)
+- docs/active/TASK-ID.md details (~3K)
+- Total: ~4K tokens vs 10K for old verbose format
 
-# View specific category
-cat docs/backlog/emr-infrastructure.md
+### List All Tasks
+```bash
+cat ACTIVE.md  # Quick overview (~1K)
 ```
 
-## DO NOT
+### Explore Backlog Category
+```bash
+cat docs/backlog/emr-infrastructure.md  # Load on-demand
+```
 
-- Run taskflow-list.sh (15K tokens)
-- Run taskflow-resume.sh (10K tokens)  
-- Use ASCII box formatting
+## How It Works
 
-## Instead
+**Session startup**: Only ACTIVE.md (1K) + BACKLOG.md (1K) = 2K tokens
 
-Just read the markdown files directly:
-- ACTIVE.md (3K tokens)
-- BACKLOG.md (1K tokens)
-- docs/backlog/*.md (when needed)
+**When resuming work**: Add task details (3K) = 5K total
+
+**Old system**: Everything loaded upfront = 53K tokens
+
+## Token Budget
+
+- taskflow skill: 0.5K
+- Status command: 0.05K
+- Resume command: 4K (index + details)
+- Manual file reads: 1-3K each
+
+**Total per session: 5-6K** (was 53K)
