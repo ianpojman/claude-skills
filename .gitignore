@@ -1,0 +1,18 @@
+# Runtime data (don't track)
+history.jsonl
+debug/
+file-history/
+session-env/
+shell-snapshots/
+todos/
+statsig/
+projects/
+tasks/
+plans/
+local/
+plugins/
+docs/
+ide/
+
+# Symlink to skills/scripts
+scripts

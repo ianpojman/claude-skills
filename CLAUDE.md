@@ -1,0 +1,4 @@
+- NEVER mention "Claude Code", "Claude", or "Anthropic" in commit messages, PR descriptions, or any content going into git. Do NOT add attribution footers like "Generated with Claude Code" or "Co-Authored-By: Claude" to commits or PRs.
+- dont add temporary scripts to git unless its part of a permanent solution and doesnt duplicate existing functionality.
+- use a common prefix for throwaway code and add it to gitignore, lets use Temp
+- when working on a project, always read README.md first to understand project structure, configuration, and setup instructions
