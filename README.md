@@ -2,6 +2,10 @@
 
 Personal collection of skills for enhancing Claude Code workflows.
 
+**Version**: 1.1.0
+**License**: MIT
+**Repository**: https://github.com/ianpojman/claude-skills
+
 ## Skills
 
 ### 🎯 TaskFlow - Token-Efficient Task Management
@@ -22,7 +26,19 @@ taskflow analyze    # Token usage + archival candidates
 taskflow compact    # Archive completed items
 taskflow sync       # Status synchronization
 taskflow capture    # Create/update from conversation context
+taskflow handoff    # Create session handoff for work-in-progress (NEW v1.1)
 taskflow validate   # Link integrity checking
+```
+
+**Activation** (v1.1+):
+```bash
+# Enable TaskFlow in a project
+touch .taskflow
+
+# Disable TaskFlow
+rm .taskflow
+
+# Auto-activates if TODO.md + docs/strategy/BACKLOG.md exist
 ```
 
 **Token Budgets**:

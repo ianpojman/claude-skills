@@ -126,6 +126,53 @@ CAT-003: TODO says "Ready", BACKLOG says "✅ Complete"
 - Want to preserve session insights
 - Before ending a productive session
 
+### `taskflow handoff` (NEW)
+
+**Creates session handoff for work-in-progress that a NEW Claude session can pick up**
+
+- Creates concise SESSION-*.md summary (1-2K tokens)
+- Updates TODO.md with IN PROGRESS issue ID
+- Includes current state (cluster IDs, step IDs, validation commands)
+- Links to detailed context in BACKLOG.md
+
+**Handoff format in TODO.md:**
+```markdown
+### ISSUE-ID: Task Name (IN PROGRESS)
+**Session**: [Summary Link](docs/SESSION-*.md)
+**Status**: ⏳ Current state description
+
+**What was done**: Brief list of completed work + commits
+
+**Current State**:
+- Cluster/Job IDs, timestamps
+- What's running and when it started
+
+**What needs doing**:
+1. Next steps with exact commands
+2. Validation criteria
+3. Expected outcomes
+
+**Quick Status Check**:
+```bash
+# Commands a new agent can run immediately
+```
+
+**Detailed Context**: Links to BACKLOG + session summary
+```
+
+**Use when:**
+- Long-running job needs monitoring (EMR, builds, tests)
+- Context window getting full, need to continue later
+- Want another agent to pick up seamlessly
+- Session ending but work incomplete
+
+**Pattern ensures:**
+- ✅ New agent reads TODO.md → sees IN PROGRESS task
+- ✅ Immediate context: what's running, how to check status
+- ✅ Deep context: session summary + BACKLOG details
+- ✅ Clear next steps: exact commands to run
+- ✅ Validation criteria: how to know if it worked
+
 **Output:**
 ```
 Analyzing conversation context...

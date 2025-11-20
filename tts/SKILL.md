@@ -13,7 +13,7 @@ Use macOS `say` command to announce key findings, results, and important informa
 2. **Sequential** - Use `&&`, never parallel TTS calls
 3. **Key findings only** - Important discoveries, not every step
 4. **Default voice** - Ava (Premium) or Allison (Enhanced)
-5. **Check pause + volume** - Before EVERY TTS call
+5. **Check pause** - Before EVERY TTS call
 
 ## Standard TTS Pattern
 
@@ -119,9 +119,10 @@ fi
 **Python**:
 ```python
 import subprocess
+import os
 def tts(msg, voice="Ava (Premium)"):
-    vol = subprocess.run(["cat", "~/.tts_volume"], capture_output=True, text=True).stdout.strip() or "50"
-    subprocess.run(["say", f"--volume={vol}", "-v", voice, msg])
+    if not os.path.exists(os.path.expanduser("~/.tts_paused")):
+        subprocess.run(["say", "-v", voice, msg])
 ```
 
 ## Best Practices
@@ -135,22 +136,19 @@ def tts(msg, voice="Ava (Premium)"):
 
 **Build success**:
 ```bash
-VOLUME=$(cat ~/.tts_volume 2>/dev/null || echo "50")
-test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Glass.aiff && say --volume=$VOLUME -v "Ava (Premium)" "Build succeeded. All 156 tests passed."
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Glass.aiff && say -v "Ava (Premium)" "Build succeeded. All 156 tests passed."
 ```
 
 **EMR job complete**:
 ```bash
-VOLUME=$(cat ~/.tts_volume 2>/dev/null || echo "50")
-test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Glass.aiff && say --volume=$VOLUME -v "Ava (Premium)" "E M R step completed. Processed 2 point 4 million records."
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Glass.aiff && say -v "Ava (Premium)" "E M R step completed. Processed 2 point 4 million records."
 ```
 
 **Error**:
 ```bash
-VOLUME=$(cat ~/.tts_volume 2>/dev/null || echo "50")
-test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Pop.aiff && say --volume=$VOLUME -v "Ava (Premium)" "Build failed. Three compilation errors found."
+test ! -f ~/.tts_paused && afplay /System/Library/Sounds/Pop.aiff && say -v "Ava (Premium)" "Build failed. Three compilation errors found."
 ```
 
 ---
 
-**Remember**: Pause check + volume + concise message. Quality over quantity.
+**Remember**: Pause check + concise message. Quality over quantity.
