@@ -2,18 +2,24 @@
 
 **Token-efficient task management using agents and scripts.**
 
-## Quick Reference
+## Quick Reference - Slash Commands (Recommended!)
 
-| Use Case | Command | Method | Tokens |
-|----------|---------|--------|--------|
-| **Quick status** | `~/.claude/skills/scripts/taskflow-status-minimal.sh` | Script | 0 |
-| **Analyze tokens** | "Analyze taskflow token usage" | Agent | 0 |
-| **Capture session** | "Capture this session to taskflow" | Agent | 0 |
-| **Create handoff** | "Create taskflow handoff" | Agent | 0 |
-| **Compact ACTIVE** | `~/.claude/skills/scripts/taskflow-compact-active.sh` | Script | 0 |
-| **Resume task** | `~/.claude/skills/scripts/taskflow-resume.sh TASK-ID` | Script | 0 |
+| Use Case | Command | Tokens |
+|----------|---------|--------|
+| **Quick status** | `/tfs` | ~0 |
+| **Compact ACTIVE** | `/tfc` | ~0 |
+| **Resume task** | `/tfr PARQ-003` | ~0 |
+| **Analyze tokens** | `/tfa` | 0 (agent) |
 
-⚠️ **Important**: Don't say "taskflow status" or "taskflow X" - this invokes the skill and wastes tokens! Either run scripts directly or use natural language for agent operations.
+**Or Terminal** (if you prefer shell):
+
+| Use Case | Shell Command | Tokens |
+|----------|---------------|--------|
+| **Quick status** | `~/.claude/skills/scripts/taskflow-status-minimal.sh` | 0 |
+| **Compact ACTIVE** | `~/.claude/skills/scripts/taskflow-compact-active.sh` | 0 |
+| **Resume task** | `~/.claude/skills/scripts/taskflow-resume.sh TASK-ID` | 0 |
+
+⚠️ **Important**: Don't say "taskflow status" - this invokes the skill and wastes tokens! Use slash commands (`/tfs`) or run scripts directly in terminal.
 
 ## Key Principle: Scripts vs Agents
 

@@ -11,8 +11,8 @@ tasks/
 plans/
 local/
 plugins/
-docs/
 ide/
+# Note: commands/ is tracked (slash commands)
 
 # Symlink to skills/scripts (root level only)
 /scripts
