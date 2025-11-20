@@ -14,5 +14,8 @@ plugins/
 docs/
 ide/
 
-# Symlink to skills/scripts
-scripts
+# Symlink to skills/scripts (root level only)
+/scripts
+
+# Skill script directories (but not skill symlinks)
+skills/scripts/
