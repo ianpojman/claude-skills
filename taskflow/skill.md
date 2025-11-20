@@ -31,6 +31,11 @@ Loads:
 - docs/active/TASK-ID.md details (~3K)
 - Total: ~4K tokens vs 10K for old verbose format
 
+**IMPORTANT**: When discussing tasks, always reference the filename:
+- ✅ "See docs/active/UI-007.md for details"
+- ✅ "PARQ-003.md has the schema fix steps"
+- ❌ "See UI-007 details" (no filename - harder for next agent)
+
 ### List All Tasks
 ```bash
 cat ACTIVE.md  # Quick overview (~1K)
