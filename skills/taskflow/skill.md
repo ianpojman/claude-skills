@@ -2,7 +2,23 @@
 
 **Lightweight task management with smart resume.**
 
-## Core Commands
+## Using the TaskFlow Agent (Recommended)
+
+For complex operations (analyze, capture, handoff, validate), use the **TaskFlow agent** to avoid polluting main context:
+
+```python
+# Via Task tool
+Task(
+    subagent_type="taskflow",
+    description="Analyze token usage",
+    prompt="Run taskflow analyze and report ACTIVE/BACKLOG token counts"
+)
+```
+
+**Agent has full feature set**: analyze, compact, capture, validate, handoff, search, resume
+**Zero token cost** in main context (isolated agent context)
+
+## Core Commands (Manual)
 
 ### Quick Status (~50 tokens)
 ```bash
