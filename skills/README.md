@@ -113,6 +113,21 @@ git remote add origin https://github.com/ianpojman/claude-skills.git
 git pull origin main
 ```
 
+## Troubleshooting
+
+### "no such file or directory: ./scripts/taskflow-status.sh"
+
+If you see this error when skills are invoked, the script symlinks are missing. Fix:
+
+```bash
+cd ~/.claude/skills
+ln -s ../scripts taskflow/scripts
+ln -s ../scripts knowledge-capture/scripts
+ln -s ../scripts tts/scripts
+```
+
+This happens when cloning the repo fresh, as git may not preserve symlinks depending on your configuration.
+
 ## Contributing
 
 These are personal skills, but feel free to fork and adapt for your own use!
@@ -122,13 +137,28 @@ These are personal skills, but feel free to fork and adapt for your own use!
 ```
 ~/.claude/skills/
 ├── README.md
+├── ACTIVE.md              # TaskFlow active tasks (auto-generated)
+├── BACKLOG.md            # TaskFlow backlog index (auto-generated)
+├── scripts/              # Shared scripts for all skills
+│   ├── taskflow.sh
+│   ├── taskflow-*.sh    # TaskFlow command scripts
+│   └── ...
 ├── taskflow/
-│   └── skill.md
+│   ├── skill.md
+│   └── scripts/         # Symlink to ../scripts
+├── knowledge-capture/
+│   ├── skill.md
+│   └── scripts/         # Symlink to ../scripts
 ├── tts/
-│   └── skill.md
-└── spark-optimization/
-    └── skill.md
+│   ├── skill.md
+│   └── scripts/         # Symlink to ../scripts
+└── docs/                # TaskFlow documentation (auto-generated)
+    ├── active/
+    ├── backlog/
+    └── session-notes/
 ```
+
+**Note**: Each skill directory contains a `scripts` symlink pointing to the shared `../scripts` directory. This allows skills to invoke shared scripts when activated.
 
 ## License
 
