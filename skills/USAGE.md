@@ -4,14 +4,16 @@
 
 ## Quick Reference
 
-| Use Case | Method | When to Use |
-|----------|--------|-------------|
-| **Quick status** | Script | Session start, quick check |
-| **Analyze tokens** | Agent | Weekly maintenance, token issues |
-| **Capture session** | Agent | After debugging, discoveries |
-| **Create handoff** | Agent | End of session, incomplete work |
-| **Compact ACTIVE** | Script | When ACTIVE.md > 2K tokens |
-| **Resume task** | Script | Starting work on specific task |
+| Use Case | Command | Method | Tokens |
+|----------|---------|--------|--------|
+| **Quick status** | `~/.claude/skills/scripts/taskflow-status-minimal.sh` | Script | 0 |
+| **Analyze tokens** | "Analyze taskflow token usage" | Agent | 0 |
+| **Capture session** | "Capture this session to taskflow" | Agent | 0 |
+| **Create handoff** | "Create taskflow handoff" | Agent | 0 |
+| **Compact ACTIVE** | `~/.claude/skills/scripts/taskflow-compact-active.sh` | Script | 0 |
+| **Resume task** | `~/.claude/skills/scripts/taskflow-resume.sh TASK-ID` | Script | 0 |
+
+⚠️ **Important**: Don't say "taskflow status" or "taskflow X" - this invokes the skill and wastes tokens! Either run scripts directly or use natural language for agent operations.
 
 ## Key Principle: Scripts vs Agents
 
@@ -33,10 +35,19 @@
 
 ### 1. Session Start
 
-**Quick status check using script**:
+**Quick status check using script** (0 tokens):
+
+**Direct execution** (recommended):
 ```bash
-taskflow status
+~/.claude/skills/scripts/taskflow-status-minimal.sh
 ```
+
+**Or create alias** in `~/.bashrc`/`~/.zshrc`:
+```bash
+alias tfs='~/.claude/skills/scripts/taskflow-status-minimal.sh'
+```
+
+**⚠️ Don't say "taskflow status"** - this invokes the skill and wastes tokens!
 
 Output:
 ```
@@ -180,20 +191,24 @@ docs/
 
 ## Complete Command Reference
 
-### Scripts (Direct Execution)
+### Scripts (Direct Execution - 0 Tokens)
+
+**⚠️ Run these directly from terminal or via Bash tool, NOT via natural language**
 
 ```bash
-# Status
-taskflow status                    # One-liner status
+# Status (0 tokens)
 ~/.claude/skills/scripts/taskflow-status-minimal.sh
 
-# Compact
-taskflow compact active           # Archive old session notes
+# Compact (0 tokens)
 ~/.claude/skills/scripts/taskflow-compact-active.sh
 
-# Resume
-taskflow resume TASK-ID          # Load task details
+# Resume (0 tokens)
 ~/.claude/skills/scripts/taskflow-resume.sh TASK-ID
+
+# Recommended: Create aliases in ~/.bashrc or ~/.zshrc
+alias tfs='~/.claude/skills/scripts/taskflow-status-minimal.sh'
+alias tfc='~/.claude/skills/scripts/taskflow-compact-active.sh'
+alias tfr='~/.claude/skills/scripts/taskflow-resume.sh'
 ```
 
 ### Agent Operations (Via Natural Language)
