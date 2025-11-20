@@ -1,3 +1,8 @@
+---
+name: autonomous-task-supervision
+description: Work autonomously on multi-stage tasks with session resilience via filesystem state. Use when user says "autonomous", "don't stop", "overnight", or task has 3+ sequential stages requiring monitoring → action → next stage. Creates checkpointed state in ~/.claude/tasks/active/ to survive compaction and context resets.
+---
+
 # Autonomous Task Supervision Skill
 
 **Purpose**: Work autonomously on multi-stage tasks with session resilience via filesystem state.
@@ -103,12 +108,14 @@ fi
 4. **SAVE** next_action before transitions
 5. **IMMEDIATELY** transition to next stage after current completes
 
-## When to Use
+## When to Invoke This Skill
 
+Use this skill when:
 - User says "autonomous", "don't stop", or "overnight"
 - Task has 3+ sequential stages
 - Task requires monitoring → action → next stage
 - User mentions "iterations" or "until it works"
+- Long-running operations that may survive session resets
 
 ## Anti-Patterns
 
