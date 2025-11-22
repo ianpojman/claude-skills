@@ -19,3 +19,9 @@ ide/
 
 # Skill script directories (but not skill symlinks)
 skills/scripts/
+
+# TaskFlow v2 local cache
+tasks/v2/.taskflow.db
+
+# TaskFlow session state (per-machine)
+.taskflow-session.json

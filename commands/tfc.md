@@ -1,9 +1,11 @@
 ---
-description: Capture session notes (usage: /tfc "summary text")
+description: [DEPRECATED - use /tfsync] Sync current work to issue tracker
 ---
 
-Capture session summary to ACTIVE.md:
+**DEPRECATED**: This command has been renamed to `/tfsync` for clarity. Please use `/tfsync` instead.
 
-```bash
-~/.claude/skills/scripts/taskflow-capture.sh {{args}}
+This command redirects to `/tfsync`:
+
+```
+Use SlashCommand tool with command="/tfsync {{args}}"
 ```

@@ -4,17 +4,30 @@ description: Show taskflow command reference
 
 Display the taskflow command reference:
 
-**TaskFlow Commands** (all run in isolated agent context - zero main session tokens):
+**Session Management** (for crash recovery & organization):
 
-- `/tfs` - Quick status (task count, branch, tokens)
-- `/tfl` - List all active tasks with status
-- `/tfr TASK-ID` - Resume task (full context)
-- `/tfc` - Compact ACTIVE.md (archive old notes)
+- `/tfsname NAME` - Name/rename current session (crucial for crash recovery!)
+- `/tfs` - Show status with **session name** prominently
+- `/tfhandoff` - Save session state, outputs resume command
+- `/tfresume NAME` - Resume named session after crash
+
+**Task Management**:
+
+- `/tfstart TASK-ID` - Start working on a task
+- `/tfstop` - Stop working on current task
+- `/tfcurrent` - Show current task details
+- `/tfl` - List all active tasks
+- `/tfsync` - Sync tasks to issue tracker
+
+**Maintenance**:
+
+- `/tfcompact` - Compact ACTIVE.md (archive old notes)
 - `/tfa` - Analyze token usage
-- `/tfv` - Validate link integrity
 - `/tfcap` - Capture session notes
-- `/tfh` - Generate session handoff
 - `/tfhelp` - Show this help
+
+**Deprecated**:
+- `/tfc` - Use `/tfsync` instead
 
 **Direct Scripts** (for terminal use):
 ```bash
