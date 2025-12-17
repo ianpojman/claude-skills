@@ -17,11 +17,16 @@ ide/
 # Symlink to skills/scripts (root level only)
 /scripts
 
-# Skill script directories (but not skill symlinks)
-skills/scripts/
+# Skill script directories - now tracked for deterministic behavior
+# skills/scripts/
+
+# Backup and disabled files
+*.bak
+*.disabled
 
 # TaskFlow v2 local cache
 tasks/v2/.taskflow.db
 
 # TaskFlow session state (per-machine)
 .taskflow-session.json
+archive/

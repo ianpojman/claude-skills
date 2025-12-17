@@ -32,7 +32,10 @@ ALL_TASKS=()
 if [ -x "$SESSION_SCRIPT" ]; then
     # Get all tasks from session
     CURRENT_TASK=$("$SESSION_SCRIPT" get-current)
-    mapfile -t ALL_TASKS < <("$SESSION_SCRIPT" get-all)
+    # Portable alternative to mapfile (works on Bash 3.2+)
+    while IFS= read -r task; do
+        [ -n "$task" ] && ALL_TASKS+=("$task")
+    done < <("$SESSION_SCRIPT" get-all)
 else
     # Fallback to legacy
     if [ -f ".taskflow-current" ]; then
