@@ -41,12 +41,12 @@ Keeps ACTIVE.md lean (~500-1000 token savings)
 
 ### Resume Task (loads task details on-demand)
 ```bash
-taskflow resume TASK-ID
-# Example: taskflow resume UI-007
+taskflow resume ISSUE-ID
+# Example: taskflow resume UI-007, BUG-017, PERF-003
 ```
 Loads:
 - ACTIVE.md task index (~1K)
-- docs/active/TASK-ID.md details (~3K)
+- docs/active/ISSUE-ID.md details (~3K)
 - Total: ~4K tokens vs 10K for old verbose format
 
 **IMPORTANT**: When discussing tasks, always reference the filename:

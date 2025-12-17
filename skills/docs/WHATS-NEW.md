@@ -82,11 +82,11 @@ Check what you've worked on:
 /tfhandoff
 
 # Output shows:
-# Tasks: TASK-001 TASK-002 TASK-003
+# Tasks: AUTH-001 DB-002 UI-003
 # Multiple tasks - choose one:
-#   1) /tfstart TASK-001 → Fix auth bug
-#   2) /tfstart TASK-002 → Update schema
-#   3) /tfstart TASK-003 → Refactor UI
+#   1) /tfstart AUTH-001 → Fix auth bug
+#   2) /tfstart DB-002 → Update schema
+#   3) /tfstart UI-003 → Refactor UI
 ```
 
 #### 3. Interactive Resume
@@ -118,22 +118,26 @@ Or skip straight to a task:
 
 #### 5. New /tfstart Features
 
-Create tasks on the fly:
+Create tasks with custom IDs (Jira-style):
 ```bash
-/tfstart "Fix login bug"
+/tfstart BUG-017 "Fix login bug"    # Explicit ID + description
 
-# Searches for existing tasks with "login bug"
-# If none found, creates TASK-NNN automatically
-# Adds to ACTIVE.md
-# Adds to session
+/tfstart "Fix login bug"            # Prompts for ID:
+# 📝 Creating new task: "Fix login bug"
+# Enter issue ID (e.g., BUG-001, UI-017, PERF-042):
+# > BUG-017
+# ✅ Created new task: BUG-017
 ```
+
+Use meaningful prefixes like: BUG-001, UI-017, PERF-042, AUTH-003
 
 ### Commands Reference
 
 | Command | Old Behavior | New Behavior |
 |---------|-------------|--------------|
 | `/tfstart ID` | Sets current task | Adds to session + sets current |
-| `/tfstart "desc"` | ❌ Not supported | ✅ Search or create task |
+| `/tfstart ID "desc"` | ❌ Not supported | ✅ Create task with custom ID |
+| `/tfstart "desc"` | ❌ Not supported | ✅ Prompts for ID, then creates |
 | `/tfhandoff` | Saves 1 task | Saves ALL session tasks |
 | `/tfresume ID` | Loads 1 task | Interactive task selection |
 | `/tfsync` | Updates current | Updates ALL session tasks |

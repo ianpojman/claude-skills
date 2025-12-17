@@ -3,10 +3,10 @@
 ## The Problem (Before)
 
 Old TaskFlow only tracked ONE task at a time:
-- Work on TASK-001, TASK-002, TASK-003 in same session
-- Run `/tfhandoff` → only TASK-003 saved
-- Run `/tfresume` → only TASK-003 loaded
-- **Lost context for TASK-001 and TASK-002!**
+- Work on AUTH-001, DB-002, UI-003 in same session
+- Run `/tfhandoff` → only UI-003 saved
+- Run `/tfresume` → only UI-003 loaded
+- **Lost context for AUTH-001 and DB-002!**
 
 ## The Solution (Now)
 
@@ -20,25 +20,25 @@ TaskFlow now tracks **ALL tasks in a session**:
   "started": "2025-11-21T13:30:00Z",
   "tasks": [
     {
-      "id": "TASK-001",
+      "id": "AUTH-001",
       "started": "2025-11-21T13:30:00Z",
       "last_updated": "2025-11-21T14:15:00Z",
       "status": "in_progress"
     },
     {
-      "id": "TASK-002",
+      "id": "DB-002",
       "started": "2025-11-21T14:20:00Z",
       "last_updated": "2025-11-21T15:00:00Z",
       "status": "completed"
     },
     {
-      "id": "TASK-003",
+      "id": "UI-003",
       "started": "2025-11-21T15:05:00Z",
       "last_updated": "2025-11-21T15:30:00Z",
       "status": "in_progress"
     }
   ],
-  "current_task": "TASK-003"
+  "current_task": "UI-003"
 }
 ```
 
@@ -47,13 +47,13 @@ TaskFlow now tracks **ALL tasks in a session**:
 ### 1. Start Working on Tasks
 
 ```bash
-/tfstart TASK-001
+/tfstart AUTH-001 "Fix authentication bug"
 # ... work on it ...
 
-/tfstart TASK-002
+/tfstart DB-002 "Update database schema"
 # ... work on it ...
 
-/tfstart TASK-003
+/tfstart UI-003 "Refactor UI components"
 # ... work on it ...
 ```
 
@@ -68,10 +68,10 @@ TaskFlow now tracks **ALL tasks in a session**:
 # Session ID: 2025-11-21-1330
 # Started: 2025-11-21T13:30:00Z
 # Tasks worked on:
-#   - TASK-001 (in_progress) - last updated: 2025-11-21T14:15:00Z
-#   - TASK-002 (completed) - last updated: 2025-11-21T15:00:00Z
-#   - TASK-003 (in_progress) - last updated: 2025-11-21T15:30:00Z
-# Current task: TASK-003
+#   - AUTH-001 (in_progress) - last updated: 2025-11-21T14:15:00Z
+#   - DB-002 (completed) - last updated: 2025-11-21T15:00:00Z
+#   - UI-003 (in_progress) - last updated: 2025-11-21T15:30:00Z
+# Current task: UI-003
 ```
 
 ### 3. Sync All Session Tasks
@@ -80,9 +80,9 @@ TaskFlow now tracks **ALL tasks in a session**:
 /tfsync "Made progress on auth bug, fixed DB schema, started UI refactor"
 
 # This updates ALL three task files:
-# - docs/active/TASK-001.md
-# - docs/active/TASK-002.md
-# - docs/active/TASK-003.md
+# - docs/active/AUTH-001.md
+# - docs/active/DB-002.md
+# - docs/active/UI-003.md
 ```
 
 ### 4. Create Handoff (End of Session)
@@ -91,16 +91,16 @@ TaskFlow now tracks **ALL tasks in a session**:
 /tfhandoff
 
 # Output:
-# ✓ Handoff saved: task-003-2025-11-21-1530
-#   File: docs/handoff/task-003-2025-11-21-1530.md
-#   Tasks: TASK-001 TASK-002 TASK-003
+# ✓ Handoff saved: ui-003-2025-11-21-1530
+#   File: docs/handoff/ui-003-2025-11-21-1530.md
+#   Tasks: AUTH-001 DB-002 UI-003
 #
 # Multiple tasks - choose one:
-#   1) /tfstart TASK-001
+#   1) /tfstart AUTH-001
 #      → Fix authentication bug
-#   2) /tfstart TASK-002
+#   2) /tfstart DB-002
 #      → Update database schema
-#   3) /tfstart TASK-003
+#   3) /tfstart UI-003
 #      → Refactor UI components
 ```
 
@@ -111,11 +111,11 @@ TaskFlow now tracks **ALL tasks in a session**:
 
 # Output:
 # Tasks in this session (3):
-#   1) TASK-001 - Fix authentication bug
+#   1) AUTH-001 - Fix authentication bug
 #      Status: in_progress
-#   2) TASK-002 - Update database schema
+#   2) DB-002 - Update database schema
 #      Status: completed
-#   3) TASK-003 - Refactor UI components
+#   3) UI-003 - Refactor UI components
 #      Status: in_progress
 #
 # Which task do you want to resume?
@@ -126,15 +126,16 @@ Choose a task:
 ```
 2
 
-# ✓ Now working on: TASK-002
-# [Shows full task details from docs/active/TASK-002.md]
+# ✓ Now working on: DB-002
+# [Shows full task details from docs/active/DB-002.md]
 ```
 
 ## Commands
 
 | Command | What it does |
 |---------|--------------|
-| `/tfstart TASK-ID` | Start/resume task, adds to session |
+| `/tfstart ISSUE-ID` | Start/resume task, adds to session |
+| `/tfstart ISSUE-ID "desc"` | Create new task with custom ID |
 | `/tfsession` | Show all tasks in current session |
 | `/tfsync` | Update ALL session task files |
 | `/tfhandoff` | Save handoff with ALL session tasks |
