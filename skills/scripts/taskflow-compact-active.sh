@@ -136,6 +136,7 @@ rm -f /tmp/compact_stats
     echo "✅ ACTIVE.md already compact (all notes within last $KEEP_DAYS days)"
   fi
 fi
+fi  # End of "if false" disabled block
 
 # Phase 2: Check for completed tasks in docs/active/ and move to docs/completed/
 echo ""
