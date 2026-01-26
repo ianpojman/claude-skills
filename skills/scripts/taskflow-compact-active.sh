@@ -3,11 +3,13 @@
 
 set -e
 
-PROJECT_ROOT="${1:-.}"
-ACTIVE_FILE="$PROJECT_ROOT/ACTIVE.md"
-NOTES_DIR="$PROJECT_ROOT/docs/session-notes"
-COMPLETED_DIR="$PROJECT_ROOT/docs/completed"
-ACTIVE_TASKS_DIR="$PROJECT_ROOT/docs/active"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+ACTIVE_FILE="$TASKFLOW_ROOT/ACTIVE.md"
+NOTES_DIR="$TASKFLOW_ROOT/docs/session-notes"
+COMPLETED_DIR="$TASKFLOW_ROOT/docs/completed"
+ACTIVE_TASKS_DIR="$TASKFLOW_ROOT/docs/active"
 TODAY=$(date +%Y-%m-%d)
 KEEP_DAYS=3  # Keep last 3 days of notes in ACTIVE.md
 

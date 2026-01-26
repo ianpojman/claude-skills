@@ -1,7 +1,11 @@
 #!/bin/bash
-# TaskFlow Capture - Save current session state to ACTIVE.md (non-interactive)
+# TaskFlow Capture - Save current session state to $TASKFLOW_ROOT/ACTIVE.md (non-interactive)
 
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
 
 # Non-interactive mode: accept summary as argument
 if [ -z "$1" ]; then
@@ -17,8 +21,8 @@ SESSION_SUMMARY="$1"
 
 # Get current task ID if available
 CURRENT_TASK=""
-if [ -f ".taskflow-current" ]; then
-    CURRENT_TASK=$(cat .taskflow-current)
+if [ -f "$TASKFLOW_ROOT/.taskflow-current" ]; then
+    CURRENT_TASK=$(cat $TASKFLOW_ROOT/.taskflow-current)
 fi
 
 # Build header with task ID if available
@@ -28,8 +32,8 @@ else
     HEADER="### 📅 Session Notes - ${SESSION_DATE}"
 fi
 
-# Append to ACTIVE.md
-cat >> ACTIVE.md <<EOF
+# Append to $TASKFLOW_ROOT/ACTIVE.md
+cat >> $TASKFLOW_ROOT/ACTIVE.md <<EOF
 
 ${HEADER}
 
@@ -38,7 +42,7 @@ ${SESSION_SUMMARY}
 ---
 EOF
 
-echo "✅ Session summary added to ACTIVE.md"
+echo "✅ Session summary added to $TASKFLOW_ROOT/ACTIVE.md"
 echo ""
 echo "Summary:"
 echo "  ${SESSION_SUMMARY}"

@@ -1,7 +1,11 @@
 #!/bin/bash
-# TaskFlow Init - Prime context with ACTIVE.md and BACKLOG.md for AI sessions
+# TaskFlow Init - Prime context with $TASKFLOW_ROOT/ACTIVE.md and $TASKFLOW_ROOT/BACKLOG.md for AI sessions
 
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
 
 echo "╔══════════════════════════════════════════════════════════════════════╗"
 echo "║                      TASKFLOW INIT                                   ║"
@@ -9,12 +13,12 @@ echo "╚═══════════════════════�
 echo ""
 
 # Check if files exist
-if [ ! -f "ACTIVE.md" ] || [ ! -f "BACKLOG.md" ]; then
-    echo "❌ Error: ACTIVE.md or BACKLOG.md not found"
+if [ ! -f "$TASKFLOW_ROOT/ACTIVE.md" ] || [ ! -f "$TASKFLOW_ROOT/BACKLOG.md" ]; then
+    echo "❌ Error: $TASKFLOW_ROOT/ACTIVE.md or $TASKFLOW_ROOT/BACKLOG.md not found"
     echo ""
     echo "TaskFlow requires:"
-    echo "  • ACTIVE.md - Current sprint tasks"
-    echo "  • BACKLOG.md - Future work"
+    echo "  • $TASKFLOW_ROOT/ACTIVE.md - Current sprint tasks"
+    echo "  • $TASKFLOW_ROOT/BACKLOG.md - Future work"
     echo ""
     echo "Run this from project root directory."
     exit 1
@@ -37,37 +41,37 @@ echo ""
 cat <<'PRIMER'
 Resuming work on this project. Please load TaskFlow context:
 
-1. Read ACTIVE.md - shows current sprint tasks and recent session notes
+1. Read $TASKFLOW_ROOT/ACTIVE.md - shows current sprint tasks and recent session notes
 
-Note: BACKLOG.md has detailed plans (28k tokens). Only read specific sections when needed using links from ACTIVE.md.
+Note: $TASKFLOW_ROOT/BACKLOG.md has detailed plans (28k tokens). Only read specific sections when needed using links from $TASKFLOW_ROOT/ACTIVE.md.
 
 Key TaskFlow commands:
 - taskflow status - Quick one-line status
 - taskflow handoff "summary" - End session with summary
 
-Please start by reading ACTIVE.md to see what we're currently working on.
+Please start by reading $TASKFLOW_ROOT/ACTIVE.md to see what we're currently working on.
 PRIMER
 echo ""
 echo "---"
 echo ""
-echo "💡 Or just ask Claude: 'show active' to auto-load ACTIVE.md"
+echo "💡 Or just ask Claude: 'show active' to auto-load $TASKFLOW_ROOT/ACTIVE.md"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
 # Show recent session notes if they exist
-if grep -q "^### 📅 Session Notes" ACTIVE.md 2>/dev/null; then
+if grep -q "^### 📅 Session Notes" $TASKFLOW_ROOT/ACTIVE.md 2>/dev/null; then
     echo "📅 Recent Session Notes:"
     echo ""
     # Show last session note (last occurrence before end of file)
-    awk '/^### 📅 Session Notes/{p=1} p{print} /^---$/ && p{exit}' ACTIVE.md | tail -20
+    awk '/^### 📅 Session Notes/{p=1} p{print} /^---$/ && p{exit}' $TASKFLOW_ROOT/ACTIVE.md | tail -20
     echo ""
 fi
 
 # Show active tasks summary
 echo "🚀 Active Tasks Summary:"
 echo ""
-grep "^### " ACTIVE.md | grep -v "📅 Session Notes" | head -10 | while IFS= read -r line; do
+grep "^### " $TASKFLOW_ROOT/ACTIVE.md | grep -v "📅 Session Notes" | head -10 | while IFS= read -r line; do
     echo "  • ${line#### }"
 done
 echo ""

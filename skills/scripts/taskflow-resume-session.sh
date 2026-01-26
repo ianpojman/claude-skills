@@ -3,8 +3,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-cd "$PROJECT_ROOT" || exit 1
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
 
 SESSION_ID="$1"
 TASK_CHOICE="$2"
@@ -13,18 +14,18 @@ if [ -z "$SESSION_ID" ]; then
     echo "Usage: taskflow-resume-session.sh SESSION-ID [task-number]"
     echo ""
     echo "Available handoffs:"
-    ls -1 docs/handoff/ 2>/dev/null | grep -v "^\\." | sed 's/\.md$//' | sed 's/^/  /' || echo "  (none)"
+    ls -1 $TASKFLOW_ROOT/docs/handoff/ 2>/dev/null | grep -v "^\\." | sed 's/\.md$//' | sed 's/^/  /' || echo "  (none)"
     exit 1
 fi
 
-HANDOFF_FILE="docs/handoff/${SESSION_ID}.md"
-METADATA_FILE="docs/handoff/.sessions.json"
+HANDOFF_FILE="$TASKFLOW_ROOT/docs/handoff/${SESSION_ID}.md"
+METADATA_FILE="$TASKFLOW_ROOT/docs/handoff/.sessions.json"
 
 if [ ! -f "$HANDOFF_FILE" ]; then
     echo "❌ Handoff file not found: $HANDOFF_FILE"
     echo ""
     echo "Available handoffs:"
-    ls -1 docs/handoff/ 2>/dev/null | grep -v "^\\." | sed 's/\.md$//' | sed 's/^/  /' || echo "  (none)"
+    ls -1 $TASKFLOW_ROOT/docs/handoff/ 2>/dev/null | grep -v "^\\." | sed 's/\.md$//' | sed 's/^/  /' || echo "  (none)"
     exit 1
 fi
 
@@ -49,7 +50,7 @@ echo "Tasks in this session ($TASK_COUNT):"
 echo ""
 TASK_NUM=1
 for TASK_ID in "${TASK_IDS[@]}"; do
-    TASK_FILE="docs/active/${TASK_ID}.md"
+    TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
     TASK_TITLE="Unknown"
     TASK_STATUS="Unknown"
 
@@ -105,7 +106,7 @@ if [ -n "$SELECTED_TASK" ]; then
         "$SESSION_SCRIPT" add "$SELECTED_TASK" "in_progress"
         "$SESSION_SCRIPT" set-current "$SELECTED_TASK"
     else
-        echo "$SELECTED_TASK" > .taskflow-current
+        echo "$SELECTED_TASK" > $TASKFLOW_ROOT/.taskflow-current
     fi
 
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -114,7 +115,7 @@ if [ -n "$SELECTED_TASK" ]; then
     echo ""
 
     # Show task details
-    TASK_FILE="docs/active/${SELECTED_TASK}.md"
+    TASK_FILE="$TASKFLOW_ROOT/docs/active/${SELECTED_TASK}.md"
     if [ -f "$TASK_FILE" ]; then
         cat "$TASK_FILE"
     fi

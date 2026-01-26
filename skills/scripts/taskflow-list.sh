@@ -3,13 +3,17 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+
 echo "╔══════════════════════════════════════════════════════════════════════╗"
 echo "║                      TASKFLOW - ACTIVE TASKS                         ║"
 echo "╚══════════════════════════════════════════════════════════════════════╝"
 echo ""
 
-if [ ! -f "ACTIVE.md" ]; then
-    echo "❌ ACTIVE.md not found"
+if [ ! -f "$TASKFLOW_ROOT/ACTIVE.md" ]; then
+    echo "❌ $TASKFLOW_ROOT/ACTIVE.md not found"
     exit 1
 fi
 
@@ -17,7 +21,7 @@ fi
 echo "📋 Active Tasks:"
 echo ""
 
-grep "^###" ACTIVE.md | grep -E '[A-Z]+-[0-9]+' | while IFS= read -r line; do
+grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -E '[A-Z]+-[0-9]+' | while IFS= read -r line; do
     # Extract issue ID
     issue_id=$(echo "$line" | grep -oE '[A-Z]+-[0-9]+' | head -1)
 
@@ -46,11 +50,11 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 # Count tasks by status
 # Note: grep -c returns exit 1 when count is 0, so use || true to prevent set -e from exiting
-total=$(grep "^###" ACTIVE.md | grep -cE '[A-Z]+-[0-9]+' || true)
-in_progress=$(grep "^###" ACTIVE.md | grep -c "⏳" || true)
-completed=$(grep "^###" ACTIVE.md | grep -c "✅" || true)
-new_tasks=$(grep "^###" ACTIVE.md | grep -c "🆕" || true)
-blocked=$(grep "^###" ACTIVE.md | grep -c "🔴" || true)
+total=$(grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -cE '[A-Z]+-[0-9]+' || true)
+in_progress=$(grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -c "⏳" || true)
+completed=$(grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -c "✅" || true)
+new_tasks=$(grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -c "🆕" || true)
+blocked=$(grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -c "🔴" || true)
 
 echo ""
 echo "📊 Summary:"

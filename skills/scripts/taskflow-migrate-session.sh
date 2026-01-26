@@ -4,8 +4,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-SESSION_FILE="$PROJECT_ROOT/.taskflow-session.json"
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+SESSION_FILE="$TASKFLOW_ROOT/.taskflow-session.json"
 
 if [ ! -f "$SESSION_FILE" ]; then
     echo "No session file found at: $SESSION_FILE"

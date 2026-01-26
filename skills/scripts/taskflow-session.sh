@@ -3,8 +3,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-SESSION_FILE="$PROJECT_ROOT/.taskflow-session.json"
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+SESSION_FILE="$TASKFLOW_ROOT/.taskflow-session.json"
 
 # Initialize session file if it doesn't exist
 init_session() {
@@ -17,8 +19,8 @@ init_session() {
             SESSION_ID=$(echo "$SESSION_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         else
             # Smart auto-naming: use current task or date
-            if [ -f "$PROJECT_ROOT/.taskflow-current" ]; then
-                CURRENT_TASK=$(cat "$PROJECT_ROOT/.taskflow-current" 2>/dev/null || echo "")
+            if [ -f "$TASKFLOW_ROOT/.taskflow-current" ]; then
+                CURRENT_TASK=$(cat "$TASKFLOW_ROOT/.taskflow-current" 2>/dev/null || echo "")
                 if [ -n "$CURRENT_TASK" ]; then
                     # Use task ID as session name (e.g., "perf-009-work")
                     SESSION_ID=$(echo "$CURRENT_TASK" | tr '[:upper:]' '[:lower:]')-work
@@ -115,7 +117,7 @@ set_current() {
     fi
 
     # Also update legacy file for compatibility
-    echo "$TASK_ID" > "$PROJECT_ROOT/.taskflow-current"
+    echo "$TASK_ID" > "$TASKFLOW_ROOT/.taskflow-current"
 }
 
 # Get current task
@@ -125,7 +127,7 @@ get_current() {
     if command -v jq &> /dev/null; then
         jq -r '.current_task // empty' "$SESSION_FILE"
     else
-        cat "$PROJECT_ROOT/.taskflow-current" 2>/dev/null || echo ""
+        cat "$TASKFLOW_ROOT/.taskflow-current" 2>/dev/null || echo ""
     fi
 }
 
@@ -161,7 +163,7 @@ get_session_info() {
 # Clear session (start fresh)
 clear_session() {
     rm -f "$SESSION_FILE"
-    rm -f "$PROJECT_ROOT/.taskflow-current"
+    rm -f "$TASKFLOW_ROOT/.taskflow-current"
     echo "✓ Session cleared"
 }
 

@@ -4,12 +4,13 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-cd "$PROJECT_ROOT" || exit 1
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
 
 # Create handoff directory
-mkdir -p docs/handoff
-mkdir -p docs/active
+mkdir -p "$TASKFLOW_ROOT/docs/handoff"
+mkdir -p "$TASKFLOW_ROOT/docs/active"
 
 # Get session name (optional argument)
 SESSION_NAME="$1"
@@ -18,9 +19,9 @@ CAPTURE_SUMMARY="$2"
 # Step 1: Auto-capture current session state if summary provided
 if [ -n "$CAPTURE_SUMMARY" ]; then
     CAPTURE_SCRIPT="$HOME/.claude/skills/scripts/taskflow-capture.sh"
-    if [ -x "$CAPTURE_SCRIPT" ] && [ -f "ACTIVE.md" ]; then
+    if [ -x "$CAPTURE_SCRIPT" ] && [ -f "$TASKFLOW_ROOT/ACTIVE.md" ]; then
         "$CAPTURE_SCRIPT" "$CAPTURE_SUMMARY" >/dev/null 2>&1 || true
-        echo "📝 Captured session state to ACTIVE.md"
+        echo "📝 Captured session state to $TASKFLOW_ROOT/ACTIVE.md"
     fi
 fi
 
@@ -38,21 +39,21 @@ if [ -x "$SESSION_SCRIPT" ]; then
     done < <("$SESSION_SCRIPT" get-all)
 else
     # Fallback to legacy
-    if [ -f ".taskflow-current" ]; then
-        CURRENT_TASK=$(cat .taskflow-current)
+    if [ -f "$TASKFLOW_ROOT/.taskflow-current" ]; then
+        CURRENT_TASK=$(cat $TASKFLOW_ROOT/.taskflow-current)
         ALL_TASKS=("$CURRENT_TASK")
     fi
 fi
 
 # Step 3: Ensure all tasks have task files created
 for TASK_ID in "${ALL_TASKS[@]}"; do
-    TASK_FILE="docs/active/${TASK_ID}.md"
+    TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
 
     if [ ! -f "$TASK_FILE" ]; then
         echo "⚠️  Creating missing task file: $TASK_ID"
 
-        # Extract task title from ACTIVE.md if possible
-        TASK_TITLE=$(grep "^### ${TASK_ID}:" ACTIVE.md 2>/dev/null | sed "s/^### ${TASK_ID}: //" | head -1 || echo "Unknown Task")
+        # Extract task title from $TASKFLOW_ROOT/ACTIVE.md if possible
+        TASK_TITLE=$(grep "^### ${TASK_ID}:" $TASKFLOW_ROOT/ACTIVE.md 2>/dev/null | sed "s/^### ${TASK_ID}: //" | head -1 || echo "Unknown Task")
 
         # Create task file
         cat > "$TASK_FILE" <<TASKEOF
@@ -78,16 +79,16 @@ TASKEOF
 
         echo "   ✓ Created: $TASK_FILE"
 
-        # Add to ACTIVE.md if not already there
-        if ! grep -q "^### ${TASK_ID}:" ACTIVE.md 2>/dev/null; then
+        # Add to $TASKFLOW_ROOT/ACTIVE.md if not already there
+        if ! grep -q "^### ${TASK_ID}:" $TASKFLOW_ROOT/ACTIVE.md 2>/dev/null; then
             # Find the Active Tasks section and add the task
-            if grep -q "^## 🚀 Active Tasks" ACTIVE.md; then
+            if grep -q "^## 🚀 Active Tasks" $TASKFLOW_ROOT/ACTIVE.md; then
                 sed -i.bak "/^## 🚀 Active Tasks/a\\
 \\
 ### ${TASK_ID}: ${TASK_TITLE}\\
-[Details →](docs/active/${TASK_ID}.md)
-" ACTIVE.md
-                echo "   ✓ Added to ACTIVE.md"
+[Details →]($TASKFLOW_ROOT/docs/active/${TASK_ID}.md)
+" $TASKFLOW_ROOT/ACTIVE.md
+                echo "   ✓ Added to $TASKFLOW_ROOT/ACTIVE.md"
             fi
         fi
     fi
@@ -108,8 +109,8 @@ fi
 # Sanitize session name (lowercase, replace spaces with hyphens)
 SESSION_NAME=$(echo "$SESSION_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
 
-HANDOFF_FILE="docs/handoff/${SESSION_NAME}.md"
-METADATA_FILE="docs/handoff/.sessions.json"
+HANDOFF_FILE="$TASKFLOW_ROOT/docs/handoff/${SESSION_NAME}.md"
+METADATA_FILE="$TASKFLOW_ROOT/docs/handoff/.sessions.json"
 
 # Initialize metadata file if it doesn't exist
 if [ ! -f "$METADATA_FILE" ]; then
@@ -145,7 +146,7 @@ EOF
 TASK_IDS_LIST=""
 if [ ${#ALL_TASKS[@]} -gt 0 ]; then
     for TASK_ID in "${ALL_TASKS[@]}"; do
-        TASK_FILE="docs/active/${TASK_ID}.md"
+        TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
         if [ -f "$TASK_FILE" ]; then
             TASK_TITLE=$(grep -m 1 "^# " "$TASK_FILE" | sed 's/^# //' | sed "s/${TASK_ID}: //" || echo "Unknown")
             TASK_STATUS=$(grep "^\*\*Status\*\*:" "$TASK_FILE" | head -1 | sed 's/\*\*Status\*\*: //' || echo "In Progress")
@@ -159,7 +160,7 @@ if [ ${#ALL_TASKS[@]} -gt 0 ]; then
 ### $TASK_ID: $TASK_TITLE$CURRENT_MARKER
 
 **Status**: $TASK_STATUS
-**Details**: [docs/active/${TASK_ID}.md](docs/active/${TASK_ID}.md)
+**Details**: [$TASKFLOW_ROOT/docs/active/${TASK_ID}.md]($TASKFLOW_ROOT/docs/active/${TASK_ID}.md)
 
 EOF
             TASK_IDS_LIST="$TASK_IDS_LIST $TASK_ID"
@@ -237,8 +238,8 @@ elif [ -n "$CURRENT_TASK" ]; then
 fi
 
 # Recent session notes
-if [ -f "ACTIVE.md" ]; then
-    RECENT_NOTES=$(grep -A 20 "### 📅 Session Notes" ACTIVE.md | head -20 || echo "")
+if [ -f "$TASKFLOW_ROOT/ACTIVE.md" ]; then
+    RECENT_NOTES=$(grep -A 20 "### 📅 Session Notes" $TASKFLOW_ROOT/ACTIVE.md | head -20 || echo "")
     if [ -n "$RECENT_NOTES" ]; then
         cat >> "$HANDOFF_FILE" <<EOF
 
@@ -263,7 +264,7 @@ if [ ${#ALL_TASKS[@]} -gt 0 ]; then
     echo "**Tasks worked on in this session:**" >> "$HANDOFF_FILE"
     echo "" >> "$HANDOFF_FILE"
     for TASK_ID in "${ALL_TASKS[@]}"; do
-        TASK_FILE="docs/active/${TASK_ID}.md"
+        TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
         if [ -f "$TASK_FILE" ]; then
             TASK_TITLE=$(grep -m 1 "^# " "$TASK_FILE" | sed 's/^# //' | sed "s/${TASK_ID}: //" || echo "Unknown")
             echo "- **$TASK_ID**: $TASK_TITLE" >> "$HANDOFF_FILE"

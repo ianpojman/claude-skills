@@ -3,8 +3,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-SESSION_FILE="$PROJECT_ROOT/.taskflow-session.json"
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+SESSION_FILE="$TASKFLOW_ROOT/.taskflow-session.json"
 
 # Get session info
 if [ -f "$SESSION_FILE" ] && command -v jq &> /dev/null; then
@@ -16,7 +18,7 @@ else
 fi
 
 # Count active tasks
-ACTIVE_COUNT=$(grep -c "^### " ACTIVE.md 2>/dev/null || echo "0")
+ACTIVE_COUNT=$(grep -c "^### " "$TASKFLOW_ROOT/ACTIVE.md" 2>/dev/null || echo "0")
 
 # Get git branch
 if git rev-parse --git-dir > /dev/null 2>&1; then
@@ -35,8 +37,8 @@ else
 fi
 
 # Token counts
-ACTIVE_TOKENS=$(($(wc -c < ACTIVE.md) / 4))
-BACKLOG_TOKENS=$(($(wc -c < BACKLOG.md) / 4))
+ACTIVE_TOKENS=$(($(wc -c < "$TASKFLOW_ROOT/ACTIVE.md" 2>/dev/null || echo "0") / 4))
+BACKLOG_TOKENS=$(($(wc -c < "$TASKFLOW_ROOT/BACKLOG.md" 2>/dev/null || echo "0") / 4))
 
 # Display with session name prominently
 echo "🔖 Session: $SESSION_NAME"

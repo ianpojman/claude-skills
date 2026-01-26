@@ -3,6 +3,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+
 # Check if search query provided
 if [ -z "$1" ]; then
     echo "Usage: ./scripts/taskflow-search.sh <search-query>"
@@ -61,17 +65,17 @@ search_file() {
 }
 
 # Search ACTIVE.md
-search_file "ACTIVE.md" "ACTIVE.md (Current Sprint)"
+search_file "$TASKFLOW_ROOT/ACTIVE.md" "ACTIVE.md (Current Sprint)"
 
 # Search BACKLOG.md
-search_file "BACKLOG.md" "BACKLOG.md (Future Work)"
+search_file "$TASKFLOW_ROOT/BACKLOG.md" "BACKLOG.md (Future Work)"
 
 # Search session notes
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📍 Session Notes"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-session_results=$(grep -rn -i "$QUERY" docs/SESSION-*.md 2>/dev/null || true)
+session_results=$(grep -rn -i "$QUERY" "$TASKFLOW_ROOT/docs/SESSION-*.md" 2>/dev/null || true)
 
 if [ -n "$session_results" ]; then
     echo "$session_results" | while IFS=: read -r file line_num line_text; do

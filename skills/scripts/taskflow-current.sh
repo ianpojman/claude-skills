@@ -3,8 +3,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-CURRENT_FILE="$PROJECT_ROOT/.taskflow-current"
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+CURRENT_FILE="$TASKFLOW_ROOT/.taskflow-current"
 
 if [ ! -f "$CURRENT_FILE" ]; then
     echo "❌ No current task set"
@@ -14,7 +16,7 @@ if [ ! -f "$CURRENT_FILE" ]; then
 fi
 
 TASK_ID=$(cat "$CURRENT_FILE")
-TASK_FILE="$PROJECT_ROOT/docs/active/${TASK_ID}.md"
+TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
 
 if [ ! -f "$TASK_FILE" ]; then
     echo "⚠️  Current task file not found: $TASK_ID"

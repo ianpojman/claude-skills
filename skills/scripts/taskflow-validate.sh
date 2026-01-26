@@ -3,6 +3,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
 
 echo "╔══════════════════════════════════════════════════════════════════════╗"
 echo "║                    TASKFLOW LINK VALIDATION                          ║"
@@ -12,35 +15,35 @@ echo
 ERRORS=0
 
 echo "Checking archive structure..."
-if [ -f "docs/strategy/archived/2025-11/COMPLETED.md" ]; then
+if [ -f "$TASKFLOW_ROOT/docs/strategy/archived/2025-11/COMPLETED.md" ]; then
     echo "  ✅ Archive file exists"
 else
-    echo "  ❌ Archive file missing: docs/strategy/archived/2025-11/COMPLETED.md"
+    echo "  ❌ Archive file missing: $TASKFLOW_ROOT/docs/strategy/archived/2025-11/COMPLETED.md"
     ERRORS=$((ERRORS + 1))
 fi
 echo
 
-echo "Checking ACTIVE.md references..."
-if grep -q "docs/strategy/archived" ACTIVE.md; then
-    echo "  ✅ ACTIVE.md references archive"
+echo "Checking $TASKFLOW_ROOT/ACTIVE.md references..."
+if grep -q "$TASKFLOW_ROOT/docs/strategy/archived" $TASKFLOW_ROOT/ACTIVE.md; then
+    echo "  ✅ $TASKFLOW_ROOT/ACTIVE.md references archive"
 else
-    echo "  ❌ ACTIVE.md missing archive reference"
+    echo "  ❌ $TASKFLOW_ROOT/ACTIVE.md missing archive reference"
     ERRORS=$((ERRORS + 1))
 fi
 echo
 
-echo "Checking BACKLOG.md references..."
-if grep -q "archived/2025-11/COMPLETED.md" BACKLOG.md; then
-    echo "  ✅ BACKLOG.md references archive"
+echo "Checking $TASKFLOW_ROOT/BACKLOG.md references..."
+if grep -q "archived/2025-11/COMPLETED.md" $TASKFLOW_ROOT/BACKLOG.md; then
+    echo "  ✅ $TASKFLOW_ROOT/BACKLOG.md references archive"
 else
-    echo "  ❌ BACKLOG.md missing archive reference"
+    echo "  ❌ $TASKFLOW_ROOT/BACKLOG.md missing archive reference"
     ERRORS=$((ERRORS + 1))
 fi
 echo
 
-echo "Checking for broken links in ACTIVE.md..."
-# Check docs/active/ references
-for file in $(grep -oP 'docs/active/[^)]+\.md' ACTIVE.md 2>/dev/null | sort -u); do
+echo "Checking for broken links in $TASKFLOW_ROOT/ACTIVE.md..."
+# Check $TASKFLOW_ROOT/docs/active/ references
+for file in $(grep -oP '$TASKFLOW_ROOT/docs/active/[^)]+\.md' $TASKFLOW_ROOT/ACTIVE.md 2>/dev/null | sort -u); do
     if [ -f "$file" ]; then
         echo "  ✅ $file"
     else

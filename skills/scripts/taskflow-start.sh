@@ -15,14 +15,16 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-CURRENT_FILE="$PROJECT_ROOT/.taskflow-current"
-ACTIVE_MD="$PROJECT_ROOT/ACTIVE.md"
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
+CURRENT_FILE="$TASKFLOW_ROOT/.taskflow-current"
+ACTIVE_MD="$TASKFLOW_ROOT/ACTIVE.md"
 
 # Check if input is an existing task ID or a new task description
 if [[ "$1" =~ ^[A-Z]+-[0-9]+$ ]]; then
     TASK_ID="$1"
-    TASK_FILE="$PROJECT_ROOT/docs/active/${TASK_ID}.md"
+    TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
 
     # Check if task exists OR if description provided (create new)
     if [ ! -f "$TASK_FILE" ]; then
@@ -41,6 +43,18 @@ if [[ "$1" =~ ^[A-Z]+-[0-9]+$ ]]; then
 ## Description
 
 ${TASK_DESC}
+
+## Acceptance Criteria
+
+- [ ] TODO: Define what "done" looks like
+
+## Test Plan
+
+⚠️ **Required before closing**: Define how to verify this works.
+
+| Test | Expected | Actual | Status |
+|------|----------|--------|--------|
+| TODO: Add test cases | | | ⏳ |
 
 ## Tasks
 
@@ -64,7 +78,7 @@ EOF
             echo "❌ Task file not found: $TASK_FILE"
             echo ""
             echo "Available tasks:"
-            ls -1 "$PROJECT_ROOT/docs/active/" 2>/dev/null | sed 's/\.md$//' || echo "  (none)"
+            ls -1 "$TASKFLOW_ROOT/docs/active/" 2>/dev/null | sed 's/\.md$//' || echo "  (none)"
             echo ""
             echo "Create with: /tfstart $TASK_ID \"description here\""
             exit 1
@@ -86,7 +100,7 @@ else
         read -p "Use this task? [Y/n] " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-            TASK_FILE="$PROJECT_ROOT/docs/active/${TASK_ID}.md"
+            TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
         else
             echo "Creating new task..."
             TASK_ID=""
@@ -111,7 +125,7 @@ else
 
         TASK_ID="$CUSTOM_ID"
 
-        TASK_FILE="$PROJECT_ROOT/docs/active/${TASK_ID}.md"
+        TASK_FILE="$TASKFLOW_ROOT/docs/active/${TASK_ID}.md"
         mkdir -p "$(dirname "$TASK_FILE")"
 
         # Create task file
@@ -124,6 +138,18 @@ else
 ## Description
 
 ${TASK_DESC}
+
+## Acceptance Criteria
+
+- [ ] TODO: Define what "done" looks like
+
+## Test Plan
+
+⚠️ **Required before closing**: Define how to verify this works.
+
+| Test | Expected | Actual | Status |
+|------|----------|--------|--------|
+| TODO: Add test cases | | | ⏳ |
 
 ## Tasks
 
@@ -163,7 +189,7 @@ echo "📍 Now working on: $TASK_ID - $TASK_TITLE"
 echo ""
 
 # Check if session is auto-named and show reminder
-SESSION_FILE="$PROJECT_ROOT/.taskflow-session.json"
+SESSION_FILE="$TASKFLOW_ROOT/.taskflow-session.json"
 if [ -f "$SESSION_FILE" ] && command -v jq &> /dev/null; then
     AUTO_NAMED=$(jq -r '.auto_named // false' "$SESSION_FILE")
     SESSION_NAME=$(jq -r '.session_id // "unknown"' "$SESSION_FILE")

@@ -1,14 +1,14 @@
 #!/bin/bash
 # Minimal status - no fancy formatting
 
-# Use current directory or git root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-cd "$PROJECT_ROOT" || exit 1
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
 
 # Check for current task
-if [ -f ".taskflow-current" ]; then
-    CURRENT_TASK=$(cat .taskflow-current)
-    TASK_FILE="docs/active/${CURRENT_TASK}.md"
+if [ -f "$TASKFLOW_ROOT/.taskflow-current" ]; then
+    CURRENT_TASK=$(cat $TASKFLOW_ROOT/.taskflow-current)
+    TASK_FILE="$TASKFLOW_ROOT/docs/active/${CURRENT_TASK}.md"
     if [ -f "$TASK_FILE" ]; then
         TASK_TITLE=$(grep -m 1 "^# " "$TASK_FILE" | sed 's/^# //' | sed "s/${CURRENT_TASK}: //" || echo "Unknown")
         echo "📍 Current: $CURRENT_TASK - $TASK_TITLE"
@@ -16,17 +16,17 @@ if [ -f ".taskflow-current" ]; then
 fi
 
 # Count tasks
-total=$(grep -c "^###" ACTIVE.md 2>/dev/null || echo 0)
-completed=$(grep -c "✅" ACTIVE.md 2>/dev/null || echo 0)
-in_progress=$(grep -c "⏳ IN PROGRESS" ACTIVE.md 2>/dev/null || echo 0)
+total=$(grep -c "^###" $TASKFLOW_ROOT/ACTIVE.md 2>/dev/null || echo 0)
+completed=$(grep -c "✅" $TASKFLOW_ROOT/ACTIVE.md 2>/dev/null || echo 0)
+in_progress=$(grep -c "⏳ IN PROGRESS" $TASKFLOW_ROOT/ACTIVE.md 2>/dev/null || echo 0)
 
 # Git info
 branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 commit=$(git rev-parse --short HEAD 2>/dev/null)
 
 # Token counts
-active_tokens=$(wc -c < ACTIVE.md | awk '{print int($1/4000)}')
-backlog_tokens=$(wc -c < BACKLOG.md | awk '{print int($1/4000)}')
+active_tokens=$(wc -c < $TASKFLOW_ROOT/ACTIVE.md | awk '{print int($1/4000)}')
+backlog_tokens=$(wc -c < $TASKFLOW_ROOT/BACKLOG.md | awk '{print int($1/4000)}')
 
 echo "📊 $total tasks | $in_progress active | $completed done"
 echo "📁 $branch @ $commit"
