@@ -30,3 +30,21 @@ tasks/v2/.taskflow.db
 # TaskFlow session state (per-machine)
 .taskflow-session.json
 archive/
+
+# Local/machine-specific state
+settings.local.json
+stats-cache.json
+cache/
+paste-cache/
+telemetry/
+
+# Internal/private skill integrations (HERE-specific)
+skills/confluence/
+skills/gitlab/
+skills/imessage/
+skills/trino/
+skills/scripts/confluence-api.sh
+
+# Task docs with project-specific details
+skills/docs/active/
+TASKFLOW-FIX-SUMMARY.md
