@@ -5,6 +5,8 @@ set -e
 
 # Store script directory for calling other scripts
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+TASKFLOW_ROOT=$("$SCRIPT_DIR/taskflow-resolve-root.sh" "$PROJECT_ROOT")
 
 # Parse command
 CMD="${1:-status}"
@@ -12,14 +14,14 @@ CMD="${1:-status}"
 case "$CMD" in
     status|"")
         # Compact default view: tasks + quick stats
-        if [ ! -f "ACTIVE.md" ]; then
-            echo "❌ ACTIVE.md not found - TaskFlow not initialized"
+        if [ ! -f "$TASKFLOW_ROOT/ACTIVE.md" ]; then
+            echo "❌ $TASKFLOW_ROOT/ACTIVE.md not found - TaskFlow not initialized"
             exit 1
         fi
 
         # Quick task list (first 5 tasks)
         echo "📋 Active Tasks:"
-        grep "^###" ACTIVE.md | grep -E '[A-Z]+-[0-9]+' | head -5 | while IFS= read -r line; do
+        grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -E '[A-Z]+-[0-9]+' | head -5 | while IFS= read -r line; do
             issue_id=$(echo "$line" | grep -oE '[A-Z]+-[0-9]+' | head -1)
             status_emoji=$(echo "$line" | grep -oE '(🔴|⏳|✅|🆕)' | head -1)
             description=$(echo "$line" | sed 's/^###[[:space:]]*//' | sed "s/${issue_id}:[[:space:]]*//" | sed 's/🔴//' | sed 's/⏳//' | sed 's/✅//' | sed 's/🆕//' | sed 's/(IN PROGRESS)//' | sed 's/(COMPLETE)//' | xargs | cut -c1-60)
@@ -27,15 +29,15 @@ case "$CMD" in
         done
 
         # Task count
-        total=$(grep "^###" ACTIVE.md | grep -cE '[A-Z]+-[0-9]+' || echo "0")
+        total=$(grep "^###" $TASKFLOW_ROOT/ACTIVE.md | grep -cE '[A-Z]+-[0-9]+' || echo "0")
         if [ "$total" -gt 5 ]; then
             echo "  ... and $((total - 5)) more"
         fi
         echo ""
 
         # Token status
-        ACTIVE_TOKENS=$(($(wc -c < ACTIVE.md) / 4))
-        BACKLOG_TOKENS=$(($(wc -c < BACKLOG.md 2>/dev/null || echo "0") / 4))
+        ACTIVE_TOKENS=$(($(wc -c < $TASKFLOW_ROOT/ACTIVE.md) / 4))
+        BACKLOG_TOKENS=$(($(wc -c < $TASKFLOW_ROOT/BACKLOG.md 2>/dev/null || echo "0") / 4))
         ACTIVE_STATUS=$([ $ACTIVE_TOKENS -lt 2000 ] && echo '✅' || echo '⚠️')
         BACKLOG_STATUS=$([ $BACKLOG_TOKENS -lt 10000 ] && echo '✅' || echo '⚠️')
 

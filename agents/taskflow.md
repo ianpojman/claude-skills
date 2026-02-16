@@ -28,11 +28,23 @@ See `~/.claude/skills/docs/TASKFLOW-WORKING-DIRECTORY.md` for detailed guidance.
 ## Core Responsibilities
 
 1. **Task Management**: ACTIVE.md, BACKLOG.md, docs/active/*.md
-2. **Multi-Task Session Tracking**: Track ALL tasks worked on in a session via `.taskflow-session.json`
-3. **Token Optimization**: Analyze usage, compact old content, archive completed work
-4. **Session Handoffs**: Generate context for agent-to-agent handoffs with ALL session tasks
-5. **Capture & Archive**: Preserve session insights without bloat
+2. **Test Plan Enforcement**: Require acceptance criteria + test plans before task closure
+3. **Multi-Task Session Tracking**: Track ALL tasks worked on via `.taskflow-session.json`
+4. **Token Optimization**: Analyze usage, compact old content, archive completed work
+5. **Session Handoffs**: Generate context for agent-to-agent handoffs
 6. **Validation**: Check link integrity, file structure
+
+## Test Plan Workflow (Jira-style)
+
+**On task start**: Prompt user to define acceptance criteria and test plan if missing.
+**Before closure**: Verify test plan has results. Block if tests incomplete.
+
+Task file sections:
+- `## Acceptance Criteria` - What "done" looks like
+- `## Test Plan` - Table with Test/Expected/Actual/Status columns
+- Status: ⏳ pending | ✅ pass | ❌ fail
+
+**Quick validation**: Check for `TODO` markers in Acceptance Criteria or Test Plan = incomplete.
 
 ## Session-Aware Workflow
 
@@ -124,46 +136,24 @@ docs/session-notes/YYYY-MM-DD.md → Archived notes
 
 ## Best Practices
 
-1. **Always reference filenames**: "See docs/active/UI-007.md" not just "See UI-007"
-2. **Multi-task awareness**: When user works on multiple tasks, track them ALL
-3. **Session sync**: When `/tfsync` is called, detect ALL tasks in session and update their files
-4. **Compact regularly**: Run `compact active` when ACTIVE.md > 2K tokens
-5. **Capture insights**: Use `capture` after debugging/investigations
-6. **Validate links**: After any archival or structural changes
-7. **Handoff auto-creates tasks**: Use `handoff` when context fills or work incomplete
-   - Automatically captures session summary to ACTIVE.md
-   - Auto-creates task files (docs/active/TASK-ID.md) for any tasks missing them
-   - Ensures all session tasks are properly documented
+1. **Test before close**: Never mark complete without test results in Test Plan table
+2. **Define acceptance early**: Fill in Acceptance Criteria when starting task
+3. **Reference filenames**: "See docs/active/UI-007.md" not just "See UI-007"
+4. **Multi-task awareness**: Track ALL tasks worked on in session
+5. **Compact regularly**: Run `compact active` when ACTIVE.md > 2K tokens
+6. **Handoff auto-creates**: Use `handoff` when context fills or work incomplete
 
 ## Example Workflows
 
-**Start of session**:
-```bash
-taskflow status  # Quick check
-```
+**Start of session**: `taskflow status`
 
-**After debugging session**:
-```bash
-taskflow capture "Fixed ETL-001, discovered CAT-004 root cause"
-taskflow compact active  # Archive old notes
-```
+**Before closing a task** (required):
+1. Update Test Plan table with actual results
+2. Mark all tests ✅ or ❌
+3. Ensure no `TODO` markers remain in Acceptance Criteria
+4. Then mark status as complete
 
-**End of session with incomplete work**:
-```bash
-# Handoff automatically captures + creates task records
-taskflow handoff my-session "Cluster running, waiting for validation"
-# This will:
-# - Capture the summary to ACTIVE.md
-# - Create task files for any new tasks identified
-# - Generate handoff document with resume command
-```
-
-**Weekly maintenance**:
-```bash
-taskflow analyze      # Check token usage
-taskflow compact active
-taskflow validate     # Check link integrity
-```
+**End of session**: `taskflow handoff my-session "summary"`
 
 ## Session Handoff Format
 

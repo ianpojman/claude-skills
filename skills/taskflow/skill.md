@@ -1,8 +1,10 @@
 # TaskFlow - Token-Efficient Task Management
 
-**Lightweight task management with smart resume.**
+**Jira-style task tracking with test plan enforcement.**
 
-⚠️ **IMPORTANT**: Use slash commands (`/tfs`, `/tfl`, `/tfr`) instead of invoking this skill directly to avoid loading this file into context (~900 tokens). Type `/tfhelp` for the complete command reference.
+⚠️ **IMPORTANT**: Use slash commands (`/tfs`, `/tfl`, `/tfr`) instead of invoking this skill directly. Type `/tfhelp` for complete reference.
+
+**Key feature**: Tasks require Acceptance Criteria + Test Plan before closure.
 
 ## Using the TaskFlow Agent (Recommended)
 
@@ -85,17 +87,10 @@ cat docs/backlog/emr-infrastructure.md  # Load on-demand
 
 ## Quick Tips
 
-**Zero-Token Commands** (use these!):
-- `/tfs` - Instant status check
-- `/tfl` - List all tasks
-- `/tfr TASK-ID` - Resume task
-- `/tfc` - Compact old notes
-- `/tfhelp` - Full command list
+**Task Lifecycle**:
+1. `/tfstart TASK-ID` - Creates task with Acceptance Criteria + Test Plan template
+2. Work on task, fill in acceptance criteria
+3. Before closing: update Test Plan table with actual results
+4. Mark complete only when all tests pass
 
-**When to Use Agent** (complex ops):
-- `/tfa` - Analyze token usage
-- `/tfcap` - Capture session notes
-- `/tfh` - Generate handoffs
-- `/tfv` - Validate links
-
-**Pro Tip**: Type `/tfhelp` anytime to see all available commands without loading this skill file.
+**Commands**: `/tfs` (status), `/tfl` (list), `/tfr` (resume), `/tfhelp` (all commands)

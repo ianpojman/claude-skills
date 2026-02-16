@@ -4,30 +4,47 @@ description: Show taskflow command reference
 
 Display the taskflow command reference:
 
-**Session Management** (for crash recovery & organization):
+## 🚨 Crash Recovery Commands (memorize these!)
 
-- `/tfsname NAME` - Name/rename current session (crucial for crash recovery!)
-- `/tfs` - Show status with **session name** prominently
-- `/tfhandoff` - Save session state, outputs resume command
-- `/tfresume NAME` - Resume named session after crash
+**Simple aliases** (use under stress):
+- `/name session-name` - Name your session (do this early!)
+- `/save` - Save session state before crash
+- `/sessions` - List all saved sessions
+- `/resume session-name` - Restore session after crash
 
-**Task Management**:
+**Recovery workflow:**
+```
+BEFORE: /name perf-work → /save
+AFTER:  /sessions → /resume perf-work
+```
 
-- `/tfstart TASK-ID` - Start working on a task
+---
+
+## Complete Command Reference
+
+**Session Management:**
+- `/name NAME` or `/tfsname NAME` - Name/rename session
+- `/save` or `/tfhandoff` - Save session, get resume command
+- `/sessions` or `/tflist` - List saved sessions
+- `/resume NAME` or `/tfresume NAME` - Resume session
+- `/tfs` - Show status with session name
+
+**Task Management:**
+- `/tasks` or `/tfl` - List all active tasks
+- `/tfstart TASK-ID` - Start task (creates Acceptance Criteria + Test Plan)
 - `/tfstop` - Stop working on current task
 - `/tfcurrent` - Show current task details
-- `/tfl` - List all active tasks
 - `/tfsync` - Sync tasks to issue tracker
 
-**Maintenance**:
+**Test Plan Workflow:**
+Before closing any task, update the Test Plan table with actual results.
+Tasks with `TODO` in Acceptance Criteria or incomplete tests cannot be closed.
 
+**Maintenance:**
 - `/tfcompact` - Compact ACTIVE.md (archive old notes)
 - `/tfa` - Analyze token usage
 - `/tfcap` - Capture session notes
 - `/tfhelp` - Show this help
-
-**Deprecated**:
-- `/tfc` - Use `/tfsync` instead
 
 **Direct Scripts** (for terminal use):
 ```bash
