@@ -1,0 +1,273 @@
+<!--
+  Canonical report theme framework (single source of truth for /report and /mobileReport).
+  Usage when generating a report:
+   1. Set <html data-theme="carbon" data-choice="auto" lang="en">
+   2. Inline the THEME:STYLE block in <head> (it carries palettes + layout classes + the ⌘K palette CSS).
+   3. Inline the THEME:BODY block as the first child of <body>.
+   4. Inline the THEME:SCRIPT block just before </body>.
+   5. Build report content with the layout classes documented at the bottom.
+  Default UX: NO visible theme widget — press ⌘K / Ctrl+K to open the palette. Choice persists in
+  localStorage ("report-theme"); Auto = Aperture (light) / Carbon (dark) following the OS.
+  Palettes (14): slate · carbon · dim · dusk · graphite · aurora · indigo · teal · amber · mono · aperture · paper · midnight.
+  GENERATED FROM theme-kit/palettes.json via build-theme-css.mjs — do not hand-edit.
+-->
+
+<!-- ========================= THEME:STYLE (place in <head>) ========================= -->
+<style>
+  :root{ --maxw:980px; --fs:15px;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace; }
+  /* ===== PALETTES (single source of truth; g1/g2 equal = solid accent) ===== */
+  [data-theme="slate"]{--bg:#181b21;--surface:#20242c;--elev:#272c35;--line:#333a45;--text:#e6e9ef;--muted:#99a2b0;--faint:#6b7480;--g1:#5cb8ff;--g2:#5cb8ff;--green:#4ade80;--amber:#fbbf24;--rose:#fb7185;--code-bg:#12151a;--code-tx:#cdd3dc;--glow:rgba(92,184,255,.10);--scheme:dark}
+  [data-theme="carbon"]{--bg:#1c1c1e;--surface:#2c2c2e;--elev:#3a3a3c;--line:#48484a;--text:#f2f2f7;--muted:#aeaeb2;--faint:#8e8e93;--g1:#0a84ff;--g2:#0a84ff;--green:#30d158;--amber:#ffd60a;--rose:#ff453a;--code-bg:#141416;--code-tx:#d8d8dc;--glow:rgba(10,132,255,.10);--scheme:dark}
+  [data-theme="dim"]{--bg:#22272e;--surface:#2d333b;--elev:#373e47;--line:#444c56;--text:#cdd9e5;--muted:#909dab;--faint:#636e7b;--g1:#539bf5;--g2:#539bf5;--green:#57ab5a;--amber:#daaa3f;--rose:#e5534b;--code-bg:#1c2128;--code-tx:#adbac7;--glow:rgba(83,155,245,.10);--scheme:dark}
+  [data-theme="dusk"]{--bg:#1b1a23;--surface:#232230;--elev:#2c2a3b;--line:#393650;--text:#e9e7f2;--muted:#a09bb5;--faint:#6a6580;--g1:#a78bfa;--g2:#7c6cf6;--green:#34d399;--amber:#fbbf24;--rose:#fb7185;--code-bg:#141320;--code-tx:#d3cfe2;--glow:rgba(167,139,250,.12);--scheme:dark}
+  [data-theme="graphite"]{--bg:#0a0b0e;--surface:#14161b;--elev:#1b1e25;--line:#23262e;--text:#e9ecf2;--muted:#8b929e;--faint:#5b626e;--g1:#4cc2ff;--g2:#4cc2ff;--green:#4ade80;--amber:#fbbf24;--rose:#fb7185;--code-bg:#06070a;--code-tx:#c7cdd7;--glow:rgba(76,194,255,.10);--scheme:dark}
+  [data-theme="aurora"]{--bg:#0b0c12;--surface:#13151e;--elev:#191c27;--line:#262a39;--text:#eef0f6;--muted:#9aa3b8;--faint:#5d6479;--g1:#8b5cf6;--g2:#22d3ee;--green:#34d399;--amber:#fbbf24;--rose:#fb7185;--code-bg:#070810;--code-tx:#cdd3e2;--glow:rgba(124,108,246,.12);--scheme:dark}
+  [data-theme="indigo"]{--bg:#0a0b14;--surface:#13141f;--elev:#191b2b;--line:#242741;--text:#e8eaf6;--muted:#9498b5;--faint:#565a78;--g1:#6366f1;--g2:#818cf8;--green:#34d399;--amber:#fbbf24;--rose:#fb7185;--code-bg:#060713;--code-tx:#c9cce0;--glow:rgba(99,102,241,.12);--scheme:dark}
+  [data-theme="teal"]{--bg:#0a0e0e;--surface:#121a1a;--elev:#172323;--line:#213030;--text:#e8f1f0;--muted:#8ca3a1;--faint:#566866;--g1:#2dd4bf;--g2:#2dd4bf;--green:#4ade80;--amber:#fbbf24;--rose:#fb7185;--code-bg:#060a0a;--code-tx:#c4d4d2;--glow:rgba(45,212,191,.10);--scheme:dark}
+  [data-theme="amber"]{--bg:#0e0c08;--surface:#1a1610;--elev:#231d14;--line:#312a1d;--text:#f3ede2;--muted:#a89c84;--faint:#6e6450;--g1:#f59e0b;--g2:#f59e0b;--green:#84cc16;--amber:#f59e0b;--rose:#fb7185;--code-bg:#0a0805;--code-tx:#d8cfbd;--glow:rgba(245,158,11,.10);--scheme:dark}
+  [data-theme="mono"]{--bg:#0c0c0d;--surface:#161617;--elev:#1d1d1f;--line:#272729;--text:#ededee;--muted:#9b9b9e;--faint:#5f5f63;--g1:#d4d4d6;--g2:#9b9b9e;--green:#86d39b;--amber:#d8c08a;--rose:#e2a0a4;--code-bg:#070708;--code-tx:#c9c9cb;--glow:rgba(212,212,214,.06);--scheme:dark}
+  [data-theme="aperture"]{--bg:#ffffff;--surface:#f5f5f7;--elev:#ececed;--line:#e3e3e6;--text:#1d1d1f;--muted:#6e6e73;--faint:#a1a1a6;--g1:#0071e3;--g2:#0071e3;--green:#1a8a3c;--amber:#9a6a00;--rose:#c0362c;--code-bg:#1d1d1f;--code-tx:#f5f5f7;--glow:rgba(0,113,227,.07);--scheme:light}
+  [data-theme="paper"]{--bg:#faf8f3;--surface:#f1ede3;--elev:#e7e1d3;--line:#e2dbca;--text:#2a2620;--muted:#76705f;--faint:#a39c8a;--g1:#b4791f;--g2:#b4791f;--green:#3f7d2e;--amber:#9a6a00;--rose:#b1402f;--code-bg:#2a2620;--code-tx:#f1ede3;--glow:rgba(180,121,31,.08);--scheme:light}
+  [data-theme="midnight"]{--bg:#0a0a0b;--surface:#171717;--elev:#262626;--line:#262626;--text:#f5f5f5;--muted:#a3a3a3;--faint:#737373;--g1:#3b82f6;--g2:#3b82f6;--green:#34d399;--amber:#fbbf24;--rose:#fb7185;--code-bg:#0a0a0a;--code-tx:#d4d4d4;--glow:rgba(59,130,246,.10);--scheme:dark}
+
+  *{box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased;color-scheme:var(--scheme)}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:var(--fs);line-height:1.6;letter-spacing:-0.01em;transition:background .22s,color .22s}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px 96px}
+  .wrap p{max-width:72ch}
+  .wrap .kpi p{max-width:none}
+  .wide{width:min(1400px,calc(100vw - 32px));margin-left:50%;transform:translateX(-50%)}
+  .scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  img,svg{max-width:100%;height:auto}
+  header{padding:70px 0 40px;position:relative}
+  header::before{content:"";position:absolute;inset:-44px -30px auto -30px;height:190px;z-index:0;pointer-events:none;filter:blur(8px);background:radial-gradient(58% 100% at 22% 0%,var(--glow),transparent)}
+  header>*{position:relative;z-index:1}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.05em;margin:0 0 13px;background:linear-gradient(90deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  h1{font-size:38px;line-height:1.1;font-weight:620;letter-spacing:-0.032em;margin:0 0 13px;max-width:20ch}
+  .grad{background:linear-gradient(110deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--muted);font-size:18px;max-width:48ch;margin:0;line-height:1.5}
+  .status{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:13px;font-weight:600;color:var(--muted)}
+  .dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g2))}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:44px 0 8px}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:21px 16px;position:relative;overflow:hidden;transition:transform .15s}
+  .kpi::after{content:"";position:absolute;top:0;left:0;right:0;height:1.5px;opacity:.55;background:linear-gradient(90deg,var(--g1),var(--g2))}
+  .kpi:hover{transform:translateY(-2px)}
+  .kpi .n{font-size:28px;font-weight:620;letter-spacing:-0.03em}
+  .kpi .l{color:var(--muted);font-size:12px;margin-top:5px}
+  h2{font-size:12.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:50px 0 14px}
+  h3{font-size:15.5px;font-weight:620;letter-spacing:-0.02em;margin:22px 0 7px;color:var(--text)}
+  p{margin:0 0 14px}
+  .callout{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px 19px;margin:13px 0}
+  .callout.bug{box-shadow:inset 3px 0 0 var(--rose)} .callout.ok{box-shadow:inset 3px 0 0 var(--green)} .callout strong{font-weight:620}
+  .files{padding:0;margin:13px 0;border-top:1px solid var(--line)}
+  .files li{list-style:none;display:flex;gap:13px;align-items:center;padding:14px 2px;border-bottom:1px solid var(--line)}
+  .tag{font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:6px;white-space:nowrap}
+  .t-fix{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+  .t-cfg{background:color-mix(in srgb,var(--g1) 16%,transparent);color:var(--g1)}
+  .t-del{background:color-mix(in srgb,var(--rose) 16%,transparent);color:var(--rose)}
+  .t-mem{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+  .fp{font-family:var(--mono);font-size:13px;color:var(--text)}
+  code{font-family:var(--mono);background:var(--elev);padding:2px 6px;border-radius:6px;font-size:13px}
+  .code{display:block;background:var(--code-bg);border-radius:12px;padding:16px 18px;font-family:var(--mono);font-size:12.5px;color:var(--code-tx);overflow-x:auto;white-space:pre;margin:13px 0;line-height:1.55}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+  th{text-align:left;color:var(--faint);font-weight:600;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;padding:9px 10px;border-bottom:1px solid var(--line)}
+  td{padding:13px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .ok-t{color:var(--green)}.warn-t{color:var(--amber)}.bad-t{color:var(--rose)}
+  ul.plain{margin:6px 0;padding-left:20px}ul.plain li{margin:4px 0}
+  .meta{color:var(--faint);font-size:12.5px;margin-top:50px;padding-top:18px;border-top:1px solid var(--line)}
+  .pill{font-family:var(--mono);font-size:12px;background:var(--elev);border-radius:5px;padding:1px 6px}
+  kbd{font-family:var(--mono);font-size:11px;background:var(--elev);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}h1{font-size:31px}}
+  /* ===== ⌘K theme palette (hidden until invoked) ===== */
+  #ck{position:fixed;inset:0;z-index:80;display:none;align-items:flex-start;justify-content:center;padding-top:14vh}
+  #ck.open{display:flex}
+  #ck .bg{position:absolute;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  #ck .panel{position:relative;width:min(440px,92vw);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.4);overflow:hidden}
+  #ck input{width:100%;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:15px;padding:16px 18px;border-bottom:1px solid var(--line)}
+  #ck input::placeholder{color:var(--faint)}
+  #ck .list{max-height:46vh;overflow:auto;padding:6px}
+  #ck .grp{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700;padding:9px 12px 4px}
+  #ck .row{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;cursor:pointer;color:var(--text)}
+  #ck .row[aria-selected="true"]{background:var(--elev)}
+  #ck .row .nm{flex:1} #ck .row .chk{color:var(--g1);font-size:13px;opacity:0} #ck .row.active .chk{opacity:1}
+  #ck .foot{display:flex;gap:16px;padding:9px 14px;border-top:1px solid var(--line);color:var(--faint);font-size:11px}
+  .sw{width:15px;height:15px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(127,127,127,.4)}
+  .sw-auto{background:linear-gradient(135deg,#e8e8ea 0 50%,#1c1c1e 50% 100%)}
+  .sw-slate{background:#5cb8ff}.sw-carbon{background:#0a84ff}.sw-dim{background:#539bf5}.sw-dusk{background:linear-gradient(135deg,#a78bfa,#7c6cf6)}
+  .sw-graphite{background:#4cc2ff}.sw-aurora{background:linear-gradient(135deg,#8b5cf6,#22d3ee)}.sw-indigo{background:linear-gradient(135deg,#6366f1,#818cf8)}
+  .sw-teal{background:#2dd4bf}.sw-amber{background:#f59e0b}.sw-mono{background:linear-gradient(135deg,#d4d4d6,#6f6f73)}
+  .sw-aperture{background:#0071e3}.sw-paper{background:#b4791f}.sw-midnight{background:#3b82f6}
+  @media print{#ck{display:none!important}header::before{display:none}}
+</style>
+
+<!-- ========================= THEME:BODY (first child of <body>) ========================= -->
+<div id="ck" aria-hidden="true">
+  <div class="bg" data-close></div>
+  <div class="panel" role="dialog" aria-label="Set theme">
+    <input id="ck-in" type="text" placeholder="Set theme…  (↑↓ then ↵, esc to close)" autocomplete="off" spellcheck="false">
+    <div class="list" id="ck-list"></div>
+    <div class="foot"><span>↑↓ navigate</span><span>↵ apply</span><span>esc close</span></div>
+  </div>
+</div>
+
+<!-- ========================= THEME:SCRIPT (just before </body>) ========================= -->
+<script>
+(function(){
+function initThemeKit(opts) {
+  opts = opts || {};
+  var themes = opts.themes || [];
+  var auto = opts.auto || { light: "aperture", dark: "carbon" };
+  var KEY = opts.storageKey || "theme-choice";
+  var defaultChoice = opts.defaultChoice || "auto";
+  var triggerKey = (opts.triggerKey || "k").toLowerCase();
+
+  var root = document.documentElement;
+  var mqLight = window.matchMedia("(prefers-color-scheme: light)");
+
+  // Build the picker catalog: a synthetic "auto" row first, then the real themes.
+  var picker = [{ id: "auto", name: "Auto", grp: "System" }].concat(
+    themes.map(function (t) {
+      return { id: t.id, name: t.name, grp: t.group };
+    })
+  );
+  var ids = picker.map(function (t) { return t.id; });
+
+  function byId(id) {
+    for (var i = 0; i < themes.length; i++) if (themes[i].id === id) return themes[i];
+    return null;
+  }
+  function resolve(c) {
+    return c === "auto" ? (mqLight.matches ? auto.light : auto.dark) : c;
+  }
+  function apply(choice) {
+    var id = resolve(choice);
+    var t = byId(id);
+    var scheme = t ? t.scheme : "dark";
+    root.setAttribute("data-theme", id);
+    root.setAttribute("data-choice", choice);
+    root.classList.toggle("dark", scheme === "dark");
+    root.classList.toggle("light", scheme === "light");
+    root.style.colorScheme = scheme;
+    try { localStorage.setItem(KEY, choice); } catch (e) {}
+  }
+
+  // Initial choice: saved (if valid) else default.
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  apply(ids.indexOf(saved) >= 0 ? saved : defaultChoice);
+
+  // Follow OS scheme changes while in auto.
+  function onScheme() {
+    if (root.getAttribute("data-choice") === "auto") apply("auto");
+  }
+  if (mqLight.addEventListener) mqLight.addEventListener("change", onScheme);
+  else if (mqLight.addListener) mqLight.addListener(onScheme);
+
+  // ----- Picker modal DOM (same structure/classes as report-theme #ck) -----
+  var ck = document.getElementById("ck");
+  if (!ck) {
+    ck = document.createElement("div");
+    ck.id = "ck";
+    ck.setAttribute("aria-hidden", "true");
+    ck.innerHTML =
+      '<div class="bg" data-close></div>' +
+      '<div class="panel" role="dialog" aria-label="Set theme">' +
+      '<input id="ck-in" type="text" placeholder="Set theme…  (↑↓ then ↵, esc to close)" autocomplete="off" spellcheck="false">' +
+      '<div class="list" id="ck-list"></div>' +
+      '<div class="foot"><span>↑↓ navigate</span><span>↵ apply</span><span>esc close</span></div>' +
+      "</div>";
+    document.body.appendChild(ck);
+  }
+  var input = ck.querySelector("#ck-in");
+  var list = ck.querySelector("#ck-list");
+  var view = [], sel = 0;
+
+  function render(q) {
+    q = (q || "").toLowerCase().trim();
+    view = []; list.innerHTML = "";
+    var cur = root.getAttribute("data-choice"), lastGrp = "";
+    picker
+      .filter(function (t) {
+        return !q || t.name.toLowerCase().indexOf(q) >= 0 || t.grp.toLowerCase().indexOf(q) >= 0;
+      })
+      .forEach(function (t) {
+        if (t.grp !== lastGrp) {
+          var g = document.createElement("div");
+          g.className = "grp"; g.textContent = t.grp;
+          list.appendChild(g); lastGrp = t.grp;
+        }
+        var r = document.createElement("div");
+        r.className = "row" + (t.id === cur ? " active" : "");
+        r.setAttribute("role", "option"); r.dataset.id = t.id;
+        r.innerHTML =
+          '<span class="sw sw-' + t.id + '"></span><span class="nm">' + t.name + '</span><span class="chk">✓</span>';
+        r.addEventListener("click", function () { choose(t.id); });
+        r.addEventListener("mousemove", function () { sel = view.indexOf(t.id); mark(); });
+        list.appendChild(r); view.push(t.id);
+      });
+    sel = Math.max(0, view.indexOf(cur)); mark();
+  }
+  function mark() {
+    var rows = list.querySelectorAll(".row");
+    rows.forEach(function (r, i) { r.setAttribute("aria-selected", i === sel ? "true" : "false"); });
+    var el = rows[sel]; if (el) el.scrollIntoView({ block: "nearest" });
+  }
+  function choose(id) { apply(id); close(); }
+  function open() {
+    render(""); input.value = "";
+    ck.classList.add("open"); ck.setAttribute("aria-hidden", "false");
+    setTimeout(function () { input.focus(); }, 20);
+  }
+  function close() {
+    ck.classList.remove("open"); ck.setAttribute("aria-hidden", "true");
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key && e.key.toLowerCase() === triggerKey) {
+      e.preventDefault();
+      ck.classList.contains("open") ? close() : open();
+      return;
+    }
+    if (!ck.classList.contains("open")) return;
+    if (e.key === "Escape") { close(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(view.length - 1, sel + 1); mark(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(0, sel - 1); mark(); }
+    else if (e.key === "Enter") { e.preventDefault(); if (view[sel]) choose(view[sel]); }
+  });
+  input.addEventListener("input", function () { render(input.value); });
+  var closeEl = ck.querySelector("[data-close]");
+  if (closeEl) closeEl.addEventListener("click", close);
+
+  // Host control surface (e.g. a React button can trigger the picker).
+  return {
+    open: open,
+    close: close,
+    setChoice: function (id) { if (ids.indexOf(id) >= 0) apply(id); },
+    getChoice: function () { return root.getAttribute("data-choice"); }
+  };
+}
+
+var THEMES=[{"id":"slate","name":"Slate","group":"Soft dark","scheme":"dark"},{"id":"carbon","name":"Carbon","group":"Soft dark","scheme":"dark"},{"id":"dim","name":"Dim","group":"Soft dark","scheme":"dark"},{"id":"dusk","name":"Dusk","group":"Soft dark","scheme":"dark"},{"id":"graphite","name":"Graphite","group":"Deep dark","scheme":"dark"},{"id":"aurora","name":"Aurora","group":"Deep dark","scheme":"dark"},{"id":"indigo","name":"Indigo","group":"Deep dark","scheme":"dark"},{"id":"teal","name":"Teal","group":"Deep dark","scheme":"dark"},{"id":"amber","name":"Amber","group":"Deep dark","scheme":"dark"},{"id":"mono","name":"Mono","group":"Deep dark","scheme":"dark"},{"id":"aperture","name":"Aperture","group":"Light","scheme":"light"},{"id":"paper","name":"Paper","group":"Light","scheme":"light"},{"id":"midnight","name":"Midnight","group":"Deep dark","scheme":"dark"}];
+var AUTO={"light":"aperture","dark":"carbon"};
+initThemeKit({themes:THEMES,auto:AUTO,storageKey:"report-theme",defaultChoice:"auto"});
+})();
+</script>
+
+<!--
+  LAYOUT CLASS VOCABULARY (build report content with these):
+   header > .eyebrow, h1 (+ optional <span class="grad"> on a keyword), .lede, .status > .dot
+   .kpis > .kpi > {.n,.l}            KPI strip (4-up; collapses to 2-up on mobile)
+   h2 (section label, uppercase) · h3 (subhead)
+   .callout (+ .bug / .ok)           highlighted note
+   ul.files > li > {.tag .t-fix|.t-cfg|.t-del|.t-mem, .fp}    file change list
+   .code                             code block · code (inline) · .pill · <kbd>
+   table/th/td · .ok-t/.warn-t/.bad-t cell text colors
+   ul.plain · .meta (footer)
+   .wide                             full-bleed breakout (min(1400px, 100vw-32px), centered) — wrap
+                                      diagrams/SVG figures in <div class="wide">; wide tables in
+                                      <div class="scrollx"> (or both) so nothing clips at 980px
+   .scrollx                          horizontal-scroll container for wide tables
+   img,svg{max-width:100%}           images/inline SVG never overflow their column by default
+-->
