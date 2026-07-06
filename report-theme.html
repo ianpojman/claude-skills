@@ -6,8 +6,11 @@
    3. Inline the THEME:BODY block as the first child of <body>.
    4. Inline the THEME:SCRIPT block just before </body>.
    5. Build report content with the layout classes documented at the bottom.
-  Default UX: NO visible theme widget — press ⌘K / Ctrl+K to open the palette. Choice persists in
-  localStorage ("report-theme"); Auto = Aperture (light) / Carbon (dark) following the OS.
+  Default UX: NO visible widgets — press ⌘K / Ctrl+K to open the command palette. Empty query shows
+  two groups: Sections (every h2/h3 in document order — jump + smooth-scroll) and Theme (persisted in
+  localStorage ("report-theme"); Auto = Aperture (light) / Carbon (dark) following the OS). Typing
+  filters those plus a live full-text search of the report body (snippet results, match highlighted;
+  jump flashes the target). Arrow keys move selection, Enter/click activates, Esc/backdrop closes.
   Palettes (14): slate · carbon · dim · dusk · graphite · aurora · indigo · teal · amber · mono · aperture · paper · midnight.
   GENERATED FROM theme-kit/palettes.json via build-theme-css.mjs — do not hand-edit.
 -->
@@ -91,7 +94,11 @@
   #ck .grp{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700;padding:9px 12px 4px}
   #ck .row{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;cursor:pointer;color:var(--text)}
   #ck .row[aria-selected="true"]{background:var(--elev)}
-  #ck .row .nm{flex:1} #ck .row .chk{color:var(--g1);font-size:13px;opacity:0} #ck .row.active .chk{opacity:1}
+  #ck .row .nm{flex:1;min-width:0} #ck .row .chk{color:var(--g1);font-size:13px;opacity:0} #ck .row.active .chk{opacity:1}
+  #ck .row .ico{flex:0 0 auto;width:15px;text-align:center;color:var(--faint);font-size:12px}
+  #ck .row .nm.sub{padding-left:14px;color:var(--muted)}
+  #ck .row .snip{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #ck .row .snip mark,#ck .row .nm mark{background:color-mix(in srgb,var(--g1) 28%,transparent);color:var(--text);border-radius:3px;padding:0 1px}
   #ck .foot{display:flex;gap:16px;padding:9px 14px;border-top:1px solid var(--line);color:var(--faint);font-size:11px}
   .sw{width:15px;height:15px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(127,127,127,.4)}
   .sw-auto{background:linear-gradient(135deg,#e8e8ea 0 50%,#1c1c1e 50% 100%)}
@@ -99,16 +106,18 @@
   .sw-graphite{background:#4cc2ff}.sw-aurora{background:linear-gradient(135deg,#8b5cf6,#22d3ee)}.sw-indigo{background:linear-gradient(135deg,#6366f1,#818cf8)}
   .sw-teal{background:#2dd4bf}.sw-amber{background:#f59e0b}.sw-mono{background:linear-gradient(135deg,#d4d4d6,#6f6f73)}
   .sw-aperture{background:#0071e3}.sw-paper{background:#b4791f}.sw-midnight{background:#3b82f6}
+  @keyframes ck-pulse{0%{background:var(--glow)}100%{background:transparent}}
+  .ck-flash{animation:ck-pulse 1.5s ease}
   @media print{#ck{display:none!important}header::before{display:none}}
 </style>
 
 <!-- ========================= THEME:BODY (first child of <body>) ========================= -->
 <div id="ck" aria-hidden="true">
   <div class="bg" data-close></div>
-  <div class="panel" role="dialog" aria-label="Set theme">
-    <input id="ck-in" type="text" placeholder="Set theme…  (↑↓ then ↵, esc to close)" autocomplete="off" spellcheck="false">
+  <div class="panel" role="dialog" aria-label="Command palette">
+    <input id="ck-in" type="text" placeholder="Jump to a section, search text, or set theme…" autocomplete="off" spellcheck="false">
     <div class="list" id="ck-list"></div>
-    <div class="foot"><span>↑↓ navigate</span><span>↵ apply</span><span>esc close</span></div>
+    <div class="foot"><span>↑↓ navigate</span><span>↵ go</span><span>esc close</span></div>
   </div>
 </div>
 
@@ -165,7 +174,7 @@ function initThemeKit(opts) {
   if (mqLight.addEventListener) mqLight.addEventListener("change", onScheme);
   else if (mqLight.addListener) mqLight.addListener(onScheme);
 
-  // ----- Picker modal DOM (same structure/classes as report-theme #ck) -----
+  // ----- Palette modal DOM (same structure/classes as report-theme #ck) -----
   var ck = document.getElementById("ck");
   if (!ck) {
     ck = document.createElement("div");
@@ -173,10 +182,10 @@ function initThemeKit(opts) {
     ck.setAttribute("aria-hidden", "true");
     ck.innerHTML =
       '<div class="bg" data-close></div>' +
-      '<div class="panel" role="dialog" aria-label="Set theme">' +
-      '<input id="ck-in" type="text" placeholder="Set theme…  (↑↓ then ↵, esc to close)" autocomplete="off" spellcheck="false">' +
+      '<div class="panel" role="dialog" aria-label="Command palette">' +
+      '<input id="ck-in" type="text" placeholder="Jump to a section, search text, or set theme…" autocomplete="off" spellcheck="false">' +
       '<div class="list" id="ck-list"></div>' +
-      '<div class="foot"><span>↑↓ navigate</span><span>↵ apply</span><span>esc close</span></div>' +
+      '<div class="foot"><span>↑↓ navigate</span><span>↵ go</span><span>esc close</span></div>' +
       "</div>";
     document.body.appendChild(ck);
   }
@@ -184,37 +193,166 @@ function initThemeKit(opts) {
   var list = ck.querySelector("#ck-list");
   var view = [], sel = 0;
 
+  // ----- Search indexes (sections + full text): built lazily on first open -----
+  var sectionsIndex = null, textIndex = null;
+  function esc(s) {
+    return String(s).replace(/[&<>]/g, function (c) { return c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;"; });
+  }
+  function clean(s) { return s.replace(/\s+/g, " ").trim(); }
+  function buildIndexes() {
+    if (sectionsIndex && textIndex) return;
+    sectionsIndex = [];
+    var lastH2 = "";
+    document.querySelectorAll("h2, h3").forEach(function (h) {
+      if (h.closest("#ck")) return;
+      if (h.tagName === "H2") {
+        lastH2 = clean(h.textContent);
+        sectionsIndex.push({ type: "section", level: 2, el: h, title: lastH2, ctx: "" });
+      } else {
+        sectionsIndex.push({ type: "section", level: 3, el: h, title: clean(h.textContent), ctx: lastH2 });
+      }
+    });
+    textIndex = [];
+    var scope = document.querySelector(".wrap") || document.body;
+    var BLOCK_SEL = "p,li,td,th,h1,h2,h3,.callout,.kpi,.code,blockquote,.meta,.fp,.pill";
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p = node.parentElement;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        var tag = p.tagName;
+        if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") return NodeFilter.FILTER_REJECT;
+        if (p.closest("#ck")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n;
+    while ((n = walker.nextNode())) {
+      var el = n.parentElement.closest(BLOCK_SEL) || n.parentElement;
+      textIndex.push({ text: n.nodeValue, el: el });
+    }
+  }
+  function markMatch(text, q) {
+    var idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx < 0) return esc(text);
+    return esc(text.slice(0, idx)) + "<mark>" + esc(text.slice(idx, idx + q.length)) + "</mark>" + esc(text.slice(idx + q.length));
+  }
+  function snippet(text, idx, qlen) {
+    var radius = 20;
+    var start = Math.max(0, idx - radius), end = Math.min(text.length, idx + qlen + radius);
+    var pre = (start > 0 ? "…" : "") + clean(text.slice(start, idx));
+    var mid = text.slice(idx, idx + qlen);
+    var post = clean(text.slice(idx + qlen, end)) + (end < text.length ? "…" : "");
+    return esc(pre) + "<mark>" + esc(mid) + "</mark>" + esc(post);
+  }
+
+  function sectionLabel(s, q) {
+    var label = s.level === 3 && s.ctx ? s.ctx + " › " + s.title : s.title;
+    return q ? markMatch(label, q) : esc(label);
+  }
+  function scrollToEl(el) {
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function flashEl(el) {
+    if (!el) return;
+    el.classList.remove("ck-flash");
+    void el.offsetWidth; // restart animation if re-triggered
+    el.classList.add("ck-flash");
+    setTimeout(function () { el.classList.remove("ck-flash"); }, 1500);
+  }
+  function activate(entry) {
+    if (!entry) return;
+    if (entry.type === "theme") { apply(entry.id); close(); return; }
+    if (entry.type === "section") { scrollToEl(entry.el); close(); return; }
+    if (entry.type === "match") { scrollToEl(entry.el); close(); flashEl(entry.el); }
+  }
+
+  function addGroup(label) {
+    var g = document.createElement("div");
+    g.className = "grp"; g.textContent = label;
+    list.appendChild(g);
+  }
+  function addRow(entry, html, activeCls) {
+    var r = document.createElement("div");
+    r.className = "row" + (activeCls ? " active" : "");
+    r.setAttribute("role", "option");
+    r.innerHTML = html;
+    var idx = view.length;
+    r.addEventListener("click", function () { activate(entry); });
+    r.addEventListener("mousemove", function () { sel = idx; mark(); });
+    list.appendChild(r);
+    view.push(entry);
+  }
+
   function render(q) {
-    q = (q || "").toLowerCase().trim();
+    buildIndexes();
+    q = (q || "").trim();
+    var ql = q.toLowerCase();
     view = []; list.innerHTML = "";
-    var cur = root.getAttribute("data-choice"), lastGrp = "";
-    picker
-      .filter(function (t) {
-        return !q || t.name.toLowerCase().indexOf(q) >= 0 || t.grp.toLowerCase().indexOf(q) >= 0;
-      })
-      .forEach(function (t) {
-        if (t.grp !== lastGrp) {
-          var g = document.createElement("div");
-          g.className = "grp"; g.textContent = t.grp;
-          list.appendChild(g); lastGrp = t.grp;
-        }
-        var r = document.createElement("div");
-        r.className = "row" + (t.id === cur ? " active" : "");
-        r.setAttribute("role", "option"); r.dataset.id = t.id;
-        r.innerHTML =
-          '<span class="sw sw-' + t.id + '"></span><span class="nm">' + t.name + '</span><span class="chk">✓</span>';
-        r.addEventListener("click", function () { choose(t.id); });
-        r.addEventListener("mousemove", function () { sel = view.indexOf(t.id); mark(); });
-        list.appendChild(r); view.push(t.id);
+    var cur = root.getAttribute("data-choice");
+
+    if (!ql) {
+      if (sectionsIndex.length) {
+        addGroup("Sections");
+        sectionsIndex.forEach(function (s) {
+          addRow(s, '<span class="ico">' + (s.level === 3 ? "↳" : "§") + '</span><span class="nm' +
+            (s.level === 3 ? " sub" : "") + '">' + sectionLabel(s, "") + "</span>");
+        });
+      }
+      addGroup("Theme");
+      picker.forEach(function (t) {
+        addRow(
+          { type: "theme", id: t.id },
+          '<span class="sw sw-' + t.id + '"></span><span class="nm">' + esc(t.name) + '</span><span class="chk">✓</span>',
+          t.id === cur
+        );
       });
-    sel = Math.max(0, view.indexOf(cur)); mark();
+    } else {
+      var secMatches = sectionsIndex.filter(function (s) { return s.title.toLowerCase().indexOf(ql) >= 0; });
+      if (secMatches.length) {
+        addGroup("Sections");
+        secMatches.forEach(function (s) {
+          addRow(s, '<span class="ico">' + (s.level === 3 ? "↳" : "§") + '</span><span class="nm' +
+            (s.level === 3 ? " sub" : "") + '">' + sectionLabel(s, q) + "</span>");
+        });
+      }
+      var themeMatches = picker.filter(function (t) {
+        return t.name.toLowerCase().indexOf(ql) >= 0 || t.grp.toLowerCase().indexOf(ql) >= 0 ||
+          (ql.length > 1 && "theme".indexOf(ql) >= 0);
+      });
+      if (themeMatches.length) {
+        addGroup("Theme");
+        themeMatches.forEach(function (t) {
+          addRow(
+            { type: "theme", id: t.id },
+            '<span class="sw sw-' + t.id + '"></span><span class="nm">' + markMatch(t.name, ql) + '</span><span class="chk">✓</span>',
+            t.id === cur
+          );
+        });
+      }
+      var hits = [];
+      for (var i = 0; i < textIndex.length && hits.length < 15; i++) {
+        var entry = textIndex[i];
+        var idx = entry.text.toLowerCase().indexOf(ql);
+        if (idx >= 0) hits.push({ entry: entry, idx: idx });
+      }
+      if (hits.length) {
+        addGroup("Text matches");
+        hits.forEach(function (h) {
+          addRow(
+            { type: "match", el: h.entry.el },
+            '<span class="ico">¶</span><span class="nm snip">' + snippet(h.entry.text, h.idx, q.length) + "</span>"
+          );
+        });
+      }
+    }
+    sel = 0; mark();
   }
   function mark() {
     var rows = list.querySelectorAll(".row");
     rows.forEach(function (r, i) { r.setAttribute("aria-selected", i === sel ? "true" : "false"); });
     var el = rows[sel]; if (el) el.scrollIntoView({ block: "nearest" });
   }
-  function choose(id) { apply(id); close(); }
   function open() {
     render(""); input.value = "";
     ck.classList.add("open"); ck.setAttribute("aria-hidden", "false");
@@ -234,7 +372,7 @@ function initThemeKit(opts) {
     if (e.key === "Escape") { close(); }
     else if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(view.length - 1, sel + 1); mark(); }
     else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(0, sel - 1); mark(); }
-    else if (e.key === "Enter") { e.preventDefault(); if (view[sel]) choose(view[sel]); }
+    else if (e.key === "Enter") { e.preventDefault(); if (view[sel]) activate(view[sel]); }
   });
   input.addEventListener("input", function () { render(input.value); });
   var closeEl = ck.querySelector("[data-close]");
@@ -270,4 +408,14 @@ initThemeKit({themes:THEMES,auto:AUTO,storageKey:"report-theme",defaultChoice:"a
                                       <div class="scrollx"> (or both) so nothing clips at 980px
    .scrollx                          horizontal-scroll container for wide tables
    img,svg{max-width:100%}           images/inline SVG never overflow their column by default
+
+  ⌘K / Ctrl+K COMMAND PALETTE (THEME:BODY #ck + THEME:SCRIPT, no extra markup needed):
+   empty query   → "Sections" group (every h2/h3 in doc order, h3 shown as "H2 › H3") + "Theme" group
+                   (same theme list/behavior as before — just relocated into the palette)
+   typed query   → live-filters Sections + Theme, plus a "Text matches" group: a lazily-built,
+                   full-text search of the visible .wrap body (up to ~15 snippet results, match
+                   highlighted via <mark>, styled off theme vars only)
+   activation    → Enter/click smooth-scrolls to the section or matched element and closes; text
+                   matches also get a brief 1.5s background pulse (.ck-flash) so the eye finds them
+   keys          → ↑/↓ move selection (mouse hover syncs it), Enter activates, Esc/backdrop closes
 -->
